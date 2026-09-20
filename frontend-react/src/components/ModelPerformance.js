@@ -24,6 +24,7 @@ function ModelPerformance() {
     { name: 'Risk (Accuracy)', val: perf.risk.accuracy * 100, fill: '#E11D48' },
     { name: 'RUL (R²)', val: perf.rul.r2 * 100, fill: '#059669' },
     { name: 'U-Net (Dice)', val: perf.unet.best_dice * 100, fill: '#D97706' },
+    ...(perf.cracknet ? [{ name: 'CrackNet (Acc)', val: perf.cracknet.val_acc * 100, fill: '#0891B2' }] : []),
   ];
 
   const cm = perf.risk.confusion_matrix || [];
@@ -111,6 +112,35 @@ function ModelPerformance() {
           </div>
           <div className="banner info">Lightweight architecture optimized for crack segmentation on resource-constrained devices.</div>
         </div>
+
+        {perf.cracknet ? (
+          <div className="g-card">
+            <div className="section-title">CrackNet Detector (Custom CNN)</div>
+            <div className="grid-3 stagger" style={{ marginBottom: 18 }}>
+              <div className="m-card" style={{textAlign:'center',background:'rgba(8,145,178,0.08)',border:'1px solid rgba(8,145,178,0.25)'}}>
+                <div className="m-label">Val Accuracy</div>
+                <div className="m-value" style={{color:'#0891B2'}}>{(perf.cracknet.val_acc * 100).toFixed(1)}%</div>
+                <div className="m-sub">crack / no-crack</div>
+              </div>
+              <div className="m-card emerald">
+                <div className="m-label">Parameters</div>
+                <div className="m-value">{(perf.cracknet.params / 1e6).toFixed(2)}M</div>
+                <div className="m-sub">MobileNet-style</div>
+              </div>
+              <div className="m-card purple">
+                <div className="m-label">Architecture</div>
+                <div className="m-value" style={{fontSize:13}}>CrackNet</div>
+                <div className="m-sub">DW-Sep Conv</div>
+              </div>
+            </div>
+            <div className="banner info">Custom MobileNet-inspired classifier trained on 40K crack images. Replaces YOLOv8 for bounding-box detection via sliding window.</div>
+          </div>
+        ) : (
+          <div className="g-card">
+            <div className="section-title">CrackNet Detector (Custom CNN)</div>
+            <div className="banner warn">Model not trained yet. Run: <code>python scripts/train_cracknet.py</code></div>
+          </div>
+        )}
       </div>
     </div>
   );

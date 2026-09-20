@@ -7,12 +7,14 @@ import ModelPerformance from './components/ModelPerformance';
 import Explainability from './components/Explainability';
 import Reports from './components/Reports';
 import ChatInspector from './components/ChatInspector';
+import CrackWidthCalculator from './components/CrackWidthCalculator';
 import { healthCheck } from './services/api';
 
 const PAGES = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'detection', label: 'Detection' },
   { key: 'risk', label: 'Risk' },
+  { key: 'crackwidth', label: 'Crack Width' },
   { key: 'performance', label: 'Models' },
   { key: 'explain', label: 'XAI' },
   { key: 'reports', label: 'Reports' },
@@ -25,6 +27,7 @@ function App() {
   const [inputs, setInputs] = useState(null);
   const [preds, setPreds] = useState(null);
   const [rec, setRec] = useState(null);
+  const [detectionData, setDetectionData] = useState(null);
 
   useEffect(() => {
     ping();
@@ -47,8 +50,9 @@ function App() {
 
   const renderPage = () => {
     switch (page) {
-      case 'detection': return <CrackDetection onNavigate={go} />;
+      case 'detection': return <CrackDetection onNavigate={go} onDetectionResult={setDetectionData} />;
       case 'risk': return <RiskPredictor onNavigate={go} onPrediction={onPredict} />;
+      case 'crackwidth': return <CrackWidthCalculator onNavigate={go} detectionData={detectionData} />;
       case 'performance': return <ModelPerformance />;
       case 'explain': return <Explainability onNavigate={go} lastInputs={inputs} />;
       case 'reports': return <Reports onNavigate={go} lastInputs={inputs} lastPredictions={preds} lastRecommendation={rec} />;

@@ -36,6 +36,7 @@ function Dashboard({ onNavigate }) {
     { name: 'Risk Classifier (Acc)', val: perf.risk.accuracy * 100, fill: '#E11D48' },
     { name: 'RUL Regressor (R²)', val: perf.rul.r2 * 100, fill: '#059669' },
     { name: 'U-Net (Dice)', val: perf.unet.best_dice * 100, fill: '#D97706' },
+    ...(perf.cracknet ? [{ name: 'CrackNet (Acc)', val: perf.cracknet.val_acc * 100, fill: '#0891B2' }] : []),
   ];
 
   return (
@@ -51,8 +52,9 @@ function Dashboard({ onNavigate }) {
       {/* Feature navigation */}
       <div className="feat-grid stagger">
         {[
-          { key: 'detection', title: 'Crack Detection', desc: 'YOLOv8 detection and U-Net segmentation on uploaded images', color: 'var(--primary)' },
+          { key: 'detection', title: 'Crack Detection', desc: 'Custom CrackNet CNN detection and U-Net segmentation on uploaded images', color: 'var(--primary)' },
           { key: 'risk', title: 'Risk Predictor', desc: 'Predict structural health index, risk level, and remaining useful life', color: 'var(--rose)' },
+          { key: 'crackwidth', title: 'Crack Width Calculator', desc: 'IS 456:2000 Annex F crack width calculation with exposure-based limits', color: '#9333ea' },
           { key: 'performance', title: 'Model Metrics', desc: 'Evaluation metrics, confusion matrices, and model performance', color: 'var(--emerald)' },
           { key: 'explain', title: 'Explainability', desc: 'SHAP waterfall plots and feature importance analysis', color: 'var(--amber)' },
           { key: 'reports', title: 'AI Reports', desc: 'Generate comprehensive inspection reports with AI', color: 'var(--primary)' },
@@ -120,6 +122,21 @@ function Dashboard({ onNavigate }) {
             <div className="m-card emerald"><div className="m-label">Params</div><div className="m-value">{(perf.unet.params / 1000).toFixed(1)}k</div></div>
           </div>
         </div>
+        {perf.cracknet && (
+          <div className="g-card">
+            <div className="section-title">CrackNet Detector</div>
+            <div className="grid-2">
+              <div className="m-card" style={{textAlign:'center',background:'rgba(8,145,178,0.08)',border:'1px solid rgba(8,145,178,0.2)'}}>
+                <div className="m-label">Val Accuracy</div>
+                <div className="m-value" style={{color:'#0891B2'}}>{(perf.cracknet.val_acc * 100).toFixed(1)}%</div>
+              </div>
+              <div className="m-card emerald">
+                <div className="m-label">Params</div>
+                <div className="m-value">{(perf.cracknet.params / 1e6).toFixed(1)}M</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

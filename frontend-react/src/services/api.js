@@ -111,3 +111,70 @@ export const chatWithInspector = async (data) => {
     throw error;
   }
 };
+
+export const calculateCrackWidthApi = async (data) => {
+  try {
+    const response = await getApi().post('/calculate_crack_width', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating crack width:', error);
+    throw error;
+  }
+};
+
+export const measureCrackWidthFromImage = async (file, params = {}) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const query = new URLSearchParams({
+      camera_distance_cm: params.camera_distance_cm ?? 50,
+      known_length_px: params.known_length_px ?? 0,
+      known_length_mm: params.known_length_mm ?? 0,
+      dpi: params.dpi ?? 0,
+      exposure: params.exposure ?? 'moderate',
+      cover_mm: params.cover_mm ?? 40,
+      design_life_years: params.design_life_years ?? 50,
+    }).toString();
+    const response = await axios.post(
+      `${API_BASE_URL}/measure_crack_width_image?${query}`,
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error measuring crack width from image:', error);
+    throw error;
+  }
+};
+
+export const calculateDurabilityImpactApi = async (data) => {
+  try {
+    const response = await getApi().post('/calculate_durability_impact', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating durability impact:', error);
+    throw error;
+  }
+};
+
+export const calculateCrackDepthApi = async (data) => {
+  try {
+    const response = await getApi().post('/calculate_crack_depth', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating crack depth:', error);
+    throw error;
+  }
+};
+
+export const calculateUPVDepthApi = async (data) => {
+  try {
+    const response = await getApi().post('/calculate_upv_depth', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating UPV depth:', error);
+    throw error;
+  }
+};
+
+

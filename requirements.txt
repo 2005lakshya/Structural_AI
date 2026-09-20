@@ -23,3 +23,5 @@ seaborn
 jupyter
 joblib
 requests
+faiss-cpu
+timm>=0.9.0

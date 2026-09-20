@@ -161,17 +161,15 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 # =============== TAB 1: IMAGE ANALYSIS ===============
 with tab1:
     st.markdown('<div class="section-header">Upload Image for Analysis</div>', unsafe_allow_html=True)
-    img_type = st.radio("Select Image Type", ["Standard (RGB)", "Thermal / IR"], horizontal=True)
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        uploaded = st.file_uploader(f"Choose a {img_type} image", type=["jpg", "jpeg", "png"], key="img_upload")
+        uploaded = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"], key="img_upload")
         use_sample = st.button("▶ Use Sample Image")
 
     img_bytes = None
     img_name = None
-    img_bytes = None
     if use_sample:
         sample = "data/crack_detection/test.jpg"
         if os.path.exists(sample):
@@ -190,30 +188,8 @@ with tab1:
             st.error("FastAPI backend is unavailable. Start uvicorn main:app --reload before using image analysis.")
             st.stop()
 
-        if img_type == "Thermal / IR":
-            with st.spinner("Running thermal anomaly analysis..."):
-                files = {"file": (img_name or "image.jpg", img_bytes)}
-                response = requests.post(f"{BACKEND_URL}/analyze_thermal", files=files, timeout=20)
-                response.raise_for_status()
-                backend_result = response.json()
-            
-            colored_mask = decode_backend_image(backend_result["mask_image_b64"])
-            anomaly_area = backend_result["anomaly_area"]
-            density = backend_result["density"]
-            
-            st.markdown("**Thermal Anomaly Overlay (Moisture/Heat)**")
-            st.image(colored_mask, use_container_width=True)
-            
-            st.markdown("---")
-            m1, m2 = st.columns(2)
-            with m1:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Anomaly Coverage</div><div class="metric-value">{density}%</div></div>', unsafe_allow_html=True)
-            with m2:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Anomaly Pixels</div><div class="metric-value">{anomaly_area:,}</div></div>', unsafe_allow_html=True)
-
-        else:
-            with st.spinner("Running analysis through the FastAPI backend..."):
-                backend_result = analyze_image_backend(img_bytes, img_name or "image.jpg")
+        with st.spinner("Running analysis through the FastAPI backend..."):
+            backend_result = analyze_image_backend(img_bytes, img_name or "image.jpg")
 
             annotated = decode_backend_image(backend_result["annotated_image_b64"])
             colored_mask = decode_backend_image(backend_result["mask_image_b64"])
@@ -233,9 +209,9 @@ with tab1:
 
             col_a, col_b = st.columns(2)
             with col_a:
-                st.markdown("**YOLOv8 Detection**")
+                st.markdown("**CrackNet Detection**")
                 st.image(annotated, use_container_width=True)
-                st.caption(f"Detected {n_det} crack region(s) with confidence ≥ 0.25")
+                st.caption(f"Detected {n_det} crack region(s) with confidence ≥ 0.55")
 
             with col_b:
                 st.markdown("**U-Net Segmentation Mask**")
@@ -246,7 +222,7 @@ with tab1:
             st.markdown("---")
             m1, m2, m3, m4 = st.columns(4)
             with m1:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Crack Regions</div><div class="metric-value">{n_det}</div><div class="metric-sub">YOLO detections</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><div class="metric-label">Crack Regions</div><div class="metric-value">{n_det}</div><div class="metric-sub">CrackNet detections</div></div>', unsafe_allow_html=True)
             with m2:
                 st.markdown(f'<div class="metric-card"><div class="metric-label">Crack Coverage</div><div class="metric-value">{density}%</div><div class="metric-sub">of image area</div></div>', unsafe_allow_html=True)
             with m3:
@@ -539,7 +515,7 @@ with st.sidebar:
     st.markdown("### 📌 System Status")
 
     checks = {
-        "YOLOv8 Model": os.path.exists("runs/detect/train/weights/best.pt") or os.path.exists("models/best.pt") or os.path.exists("yolov8n.pt"),
+        "CrackNet Model": os.path.exists("models/cracknet/cracknet_best.pth"),
         "U-Net Model": os.path.exists("models/unet/best_unet.pth"),
         "ML Models": os.path.exists("models/ml/shi_regressor.pkl"),
         "SHAP Plots": os.path.exists("outputs/shap/shi_shap_bar.png"),
