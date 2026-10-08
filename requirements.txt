@@ -16,8 +16,6 @@ pillow
 albumentations
 reportlab
 langchain
-langchain-openai
-openai
 python-multipart
 seaborn
 jupyter
@@ -25,3 +23,6 @@ joblib
 requests
 faiss-cpu
 timm>=0.9.0
+langchain-google-genai
+python-dotenv
+scipy

@@ -44,12 +44,9 @@ ENV/
 *.env
 
 # =============================
-# ML Model Weights (large files)
+# ML Model Weights (tracked via Git LFS, see .gitattributes)
 # =============================
-*.pt
-*.pth
 *.onnx
-*.pkl
 *.h5
 *.hdf5
 *.pb
@@ -68,7 +65,6 @@ data/segmentation/
 data/yolo_dataset/
 data/yolo_dataset_tiny/
 data/processed/
-data/tabular/
 
 # =============================
 # Outputs & Reports (generated)
