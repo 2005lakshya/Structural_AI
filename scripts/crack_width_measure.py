@@ -135,6 +135,110 @@ class CrackWidthResult:
     # Width distribution histogram data (for paper figures)
     width_histogram_mm: List[float] = field(default_factory=list)
 
+    # Measurement quality
+    width_method:        str   = "none"   # "subpixel_profile" | "mask_distance_transform"
+    valid_profile_count: int   = 0
+    scale_reliable:      bool  = False    # True only for reference object / DPI scale
+    resolution_ok:       bool  = False    # median width >= MIN_RELIABLE_WIDTH_PX
+    min_resolvable_width_mm: float = 0.0
+    warnings:            List[str] = field(default_factory=list)
+
+
+# Below this many pixels the crack edge blur dominates and the width is only an
+# upper bound, not a measurement.
+MIN_RELIABLE_WIDTH_PX = 2.0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Sub-pixel width from the real image intensity profile
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _profile_widths(
+    gray: np.ndarray,
+    skeleton: np.ndarray,
+    dist_transform: np.ndarray,
+    max_points: int = 600,
+) -> np.ndarray:
+    """
+    Measure crack width at full image resolution.
+
+    The U-Net mask is only used to find the crack centre-line.  At sampled
+    centre-line points we cut a profile perpendicular to the crack in the
+    ORIGINAL grayscale image and take the full width at half maximum (FWHM)
+    of the dark dip, with linear interpolation -> sub-pixel width.
+
+    Returns an array of widths in pixels (possibly empty).
+    """
+    from scipy.ndimage import map_coordinates
+
+    ys, xs = np.where(skeleton > 0)
+    n = len(ys)
+    if n < 5:
+        return np.empty(0)
+
+    step = max(1, n // max_points)
+    sel = np.arange(0, n, step)
+    pts = np.stack([ys, xs], axis=1).astype(np.float32)
+    centres = pts[sel]
+
+    # Local tangent: principal axis of skeleton neighbours within 7 px
+    normals = np.zeros_like(centres)
+    for i, c in enumerate(centres):
+        d2 = np.sum((pts - c) ** 2, axis=1)
+        nb = pts[d2 <= 49.0]
+        if len(nb) < 3:
+            normals[i] = (np.nan, np.nan)
+            continue
+        nb = nb - nb.mean(axis=0)
+        _, _, vt = np.linalg.svd(nb, full_matrices=False)
+        ty, tx = vt[0]
+        normals[i] = (tx, -ty)           # (dy, dx) of the normal
+
+    ok = ~np.isnan(normals[:, 0])
+    centres, normals = centres[ok], normals[ok]
+    if len(centres) == 0:
+        return np.empty(0)
+
+    half_mask = float(np.percentile(dist_transform[ys, xs], 95))
+    R = float(np.clip(1.5 * half_mask + 4.0, 6.0, 60.0))
+    t = np.arange(-R, R + 1e-6, 0.5, dtype=np.float32)
+    py = centres[:, 0:1] + normals[:, 0:1] * t[None, :]
+    px = centres[:, 1:2] + normals[:, 1:2] * t[None, :]
+    prof = map_coordinates(gray, [py, px], order=1, mode="nearest")
+
+    widths = []
+    T = len(t)
+    edge = max(2, int(0.2 * T))
+    for row in prof:
+        lo = int(0.2 * T)
+        hi = int(0.8 * T)
+        imin = lo + int(np.argmin(row[lo:hi]))
+        vmin = row[imin]
+        base = 0.5 * (np.median(row[:edge]) + np.median(row[-edge:]))
+        depth = base - vmin
+        if depth < 10.0:                 # no real dark dip here
+            continue
+        half = vmin + 0.5 * depth
+
+        i = imin
+        while i > 0 and row[i] < half:
+            i -= 1
+        if row[i] < half:                # never crossed
+            continue
+        tl = t[i] + (row[i] - half) / max(row[i] - row[i + 1], 1e-6) * (t[i + 1] - t[i])
+
+        j = imin
+        while j < T - 1 and row[j] < half:
+            j += 1
+        if row[j] < half:
+            continue
+        tr = t[j - 1] + (half - row[j - 1]) / max(row[j] - row[j - 1], 1e-6) * (t[j] - t[j - 1])
+
+        w = tr - tl
+        if 0.3 <= w <= 2.0 * R * 0.8:
+            widths.append(w)
+    return np.asarray(widths, dtype=np.float32)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Core measurement function
@@ -180,7 +284,7 @@ def measure_crack_width(
     # ── 1. Clean mask ──────────────────────────────────────────────────────
     binary = (mask > 127).astype(np.uint8)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=2)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel, iterations=1)
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN,  kernel, iterations=1)
 
     result.crack_pixels = int(np.sum(binary))
@@ -204,11 +308,26 @@ def measure_crack_width(
         result.overlay_image = original_bgr.copy()
         return result
 
-    # ── 4. Sample width at every skeleton pixel ────────────────────────────
-    # half_widths_px: radius at each point → full width = 2 × radius
+    # ── 4. Width at every sampled centre-line point ────────────────────────
+    # Preferred: sub-pixel FWHM of the real intensity profile (full resolution).
+    # Fallback : 2 x distance-transform radius of the (coarse) mask.
     skel_ys, skel_xs = np.where(skeleton > 0)
-    half_widths_px = dist_transform[skel_ys, skel_xs]
-    widths_px = half_widths_px * 2.0          # full width in pixels
+    gray = cv2.cvtColor(original_bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    gray = cv2.GaussianBlur(gray, (0, 0), 0.8)
+    prof_widths = _profile_widths(gray, skeleton, dist_transform)
+    n_sampled = min(len(skel_ys), 600)
+    result.valid_profile_count = int(len(prof_widths))
+
+    if len(prof_widths) >= 5 and len(prof_widths) >= 0.3 * n_sampled:
+        widths_px = prof_widths
+        result.width_method = "subpixel_profile"
+    else:
+        widths_px = dist_transform[skel_ys, skel_xs] * 2.0
+        result.width_method = "mask_distance_transform"
+        result.warnings.append(
+            "Could not find a clear dark crack profile in the photo; width fell back to the "
+            "coarse segmentation mask, which over-estimates hairline cracks."
+        )
 
     result.mean_width_px   = float(np.mean(widths_px))
     result.max_width_px    = float(np.max(widths_px))
@@ -227,6 +346,20 @@ def measure_crack_width(
     )
     result.pixels_per_mm = ppm
     result.scale_method  = method
+    result.scale_reliable = method in ("reference_object", "dpi")
+    result.min_resolvable_width_mm = round(MIN_RELIABLE_WIDTH_PX / ppm, 4)
+    if not result.scale_reliable:
+        result.warnings.append(
+            "Scale is only an estimate (no reference object). Absolute mm values can be off by "
+            "several times. Draw a reference line over an object of known length for a real measurement."
+        )
+    result.resolution_ok = result.median_width_px >= MIN_RELIABLE_WIDTH_PX
+    if not result.resolution_ok:
+        result.warnings.append(
+            f"Crack is only {result.median_width_px:.1f} px wide in this photo (needs >= "
+            f"{MIN_RELIABLE_WIDTH_PX:.0f} px). Anything below ~{result.min_resolvable_width_mm:.2f} mm cannot be "
+            "resolved at this scale; treat the value as an upper bound and re-shoot closer / with a macro lens."
+        )
 
     result.mean_width_mm   = round(result.mean_width_px   / ppm, 4)
     result.max_width_mm    = round(result.max_width_px    / ppm, 4)
@@ -246,7 +379,7 @@ def measure_crack_width(
 
     # ── 7. Overlay image ───────────────────────────────────────────────────
     result.overlay_image = _draw_overlay(
-        original_bgr, skeleton, dist_transform, widths_px, ppm,
+        original_bgr, skeleton, dist_transform, dist_transform[skel_ys, skel_xs] * 2.0, ppm,
         result.p95_width_mm, result.severity, result.is_compliant,
         result.exposure_limit_mm,
     )
@@ -290,24 +423,18 @@ def _compute_pixels_per_mm(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Skeletonization  (Zhang-Suen thinning)
+#  Skeletonization
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _skeletonize(binary: np.ndarray) -> np.ndarray:
     """
-    Iterative morphological thinning (Zhang-Suen).
+    1-pixel-wide centre-line of a binary mask (skimage Zhang-Suen style thinning).
     Returns uint8 array with skeleton pixels = 255.
+
+    (The previous erode/dilate loop returned an empty skeleton for thin cracks.)
     """
-    skel = binary.copy()
-    kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
-    while True:
-        eroded   = cv2.erode(skel, kernel)
-        temp     = cv2.dilate(eroded, kernel)
-        temp     = cv2.subtract(skel, temp)
-        skel     = eroded.copy()
-        if cv2.countNonZero(temp) == 0:
-            break
-    return skel * 255
+    from skimage.morphology import skeletonize
+    return skeletonize(binary > 0).astype(np.uint8) * 255
 
 
 # ─────────────────────────────────────────────────────────────────────────────

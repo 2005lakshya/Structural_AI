@@ -134,6 +134,7 @@ export const measureCrackWidthFromImage = async (file, params = {}) => {
       exposure: params.exposure ?? 'moderate',
       cover_mm: params.cover_mm ?? 40,
       design_life_years: params.design_life_years ?? 50,
+      lab_reading_mm: params.lab_reading_mm ?? 0,
     }).toString();
     const response = await axios.post(
       `${API_BASE_URL}/measure_crack_width_image?${query}`,

@@ -118,15 +118,32 @@ def run_unet_mask(image_array):
         UNET_MODEL_INSTANCE = model
 
     h, w = image_array.shape[:2]
-    resized = cv2.resize(image_array, (128, 128))
-    tensor = torch.tensor(resized, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0) / 255.0
-    tensor = tensor.to(DEVICE)
-    with torch.no_grad():
-        output = UNET_MODEL_INSTANCE(tensor).squeeze().cpu().numpy()
 
-    mask = (output > 0.5).astype(np.uint8) * 255
+    def _predict(img):
+        resized = cv2.resize(img, (128, 128))
+        tensor = torch.tensor(resized, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0) / 255.0
+        tensor = tensor.to(DEVICE)
+        with torch.no_grad():
+            return UNET_MODEL_INSTANCE(tensor).squeeze().cpu().numpy()
 
-    return cv2.resize(mask, (w, h))
+    # Whole-image pass, upsampled to full resolution.
+    prob = cv2.resize(_predict(image_array), (w, h), interpolation=cv2.INTER_LINEAR)
+
+    # The network works at 128x128, so on a large photo one network pixel covers
+    # many photo pixels and thin cracks get lost / blobbed.  For large images also
+    # run overlapping tiles (~512 px each, resized to 128) and keep the max.
+    TILE = 512
+    if max(h, w) > 768:
+        stride = TILE // 2
+        for y0 in range(0, max(h - TILE, 0) + stride, stride):
+            for x0 in range(0, max(w - TILE, 0) + stride, stride):
+                y1, x1 = min(y0 + TILE, h), min(x0 + TILE, w)
+                ya, xa = max(y1 - TILE, 0), max(x1 - TILE, 0)
+                tile_prob = cv2.resize(_predict(image_array[ya:y1, xa:x1]),
+                                       (x1 - xa, y1 - ya), interpolation=cv2.INTER_LINEAR)
+                prob[ya:y1, xa:x1] = np.maximum(prob[ya:y1, xa:x1], tile_prob)
+
+    return (prob > 0.5).astype(np.uint8) * 255
 
 
 def ensure_models_loaded():
@@ -784,6 +801,7 @@ async def measure_crack_width_image(
     exposure: str = "moderate",
     cover_mm: float = 40.0,
     design_life_years: float = 50.0,
+    lab_reading_mm: float = 0.0,
 ):
     """
     Measure crack width directly from an image using U-Net segmentation
@@ -819,6 +837,17 @@ async def measure_crack_width_image(
         dpi=dpi,
         exposure=exposure,
     )
+
+    # Compare against a lab/gauge reading of the same spot, if the user gave one.
+    lab_comparison = None
+    if lab_reading_mm > 0:
+        err = result.median_width_mm - lab_reading_mm
+        lab_comparison = {
+            "lab_reading_mm": lab_reading_mm,
+            "measured_median_mm": result.median_width_mm,
+            "abs_error_mm": round(err, 4),
+            "rel_error_pct": round(100.0 * err / lab_reading_mm, 1),
+        }
 
     # Encode overlay image
     overlay_b64 = ""
@@ -870,6 +899,15 @@ async def measure_crack_width_image(
         # Scale
         "pixels_per_mm":    round(result.pixels_per_mm, 3),
         "scale_method":     result.scale_method,
+        "scale_reliable":   result.scale_reliable,
+
+        # Measurement quality
+        "width_method":            result.width_method,
+        "valid_profile_count":     result.valid_profile_count,
+        "resolution_ok":           result.resolution_ok,
+        "min_resolvable_width_mm": result.min_resolvable_width_mm,
+        "warnings":                result.warnings,
+        "lab_comparison":          lab_comparison,
 
         # IS 456
         "exposure":              exposure,

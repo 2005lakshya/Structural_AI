@@ -14,6 +14,8 @@ mechanics capacity analysis and closed-loop epoxy grouting control).
 - [Datasets](#datasets)
 - [Project structure](#project-structure)
 - [Setup](#setup)
+- [Model weights (Git LFS)](#model-weights-git-lfs)
+- [Crack width measurement accuracy](#crack-width-measurement-accuracy)
 - [Running the app](#running-the-app)
 - [Training the models](#training-the-models)
 - [Known issues](#known-issues)
@@ -81,7 +83,7 @@ scripts/
   train_unet.py            Trains TinyUNet segmentation model
   train_ml.py              Trains SHI / risk / RUL tabular models
   train.py / detect.py / predict.py   Legacy YOLOv8 pipeline
-  crack_width_measure.py   Skeleton + distance-transform crack width measurement
+  crack_width_measure.py   Skeleton + sub-pixel intensity-profile crack width measurement
   physics_fracture_engine.py   LEFM fracture mechanics + residual capacity engine
   grouting_controller.py   Closed-loop epoxy injection controller
   agent.py                 LangChain/Gemini structural inspection agent
@@ -112,18 +114,48 @@ outputs/                 SHAP plots, benchmark results
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-pip install langchain-google-genai
 ```
 
-> `requirements.txt` currently lists `langchain-openai`/`openai`, but the code actually uses
-> Google Gemini via `langchain-google-genai` — install it separately until `requirements.txt`
-> is updated.
+`requirements.txt` now includes `langchain-google-genai`, `python-dotenv`, `scipy` and
+`scikit-image`.
 
 Create a `.env` file in the project root:
 
 ```
 GEMINI_API_KEY=your_google_gemini_api_key_here
 ```
+
+### Model weights (Git LFS)
+
+The trained weights (`models/**/*.pth`, `models/**/*.pkl`, `models/*.pt`, about 170 MB) are
+stored with [Git LFS](https://git-lfs.com), so they come down with the repo. They are
+tracked via `.gitattributes`; do not add them back to `.gitignore`.
+
+**On a new machine, install Git LFS before cloning:**
+
+```bash
+git lfs install
+git clone https://github.com/2005lakshya/Structural_AI.git
+```
+
+For an existing clone, run `git lfs install` then `git pull`.
+
+**Check it worked:** `git lfs ls-files` lists the weight files, and
+`models/ml/shi_regressor.pkl` should be real binary data. If the weights are tiny text files
+(a few lines starting with `version https://git-lfs...`), LFS was not installed when you
+cloned. Fix it with:
+
+```bash
+git lfs install
+git lfs pull
+```
+
+**Adding or updating a weight file** needs no extra steps. A new `*.pth`, `*.pkl` or
+`models/*.pt` is picked up automatically by the patterns in `.gitattributes`. To track a new
+location or type, run `git lfs track "<pattern>"` and commit `.gitattributes`.
+
+GitHub's free LFS quota is 1 GB of storage and 1 GB of bandwidth per month, so avoid
+committing many model versions.
 
 ### Frontend
 
@@ -163,6 +195,23 @@ Then open `http://localhost:3000`.
 ```bash
 streamlit run app.py
 ```
+
+## Crack width measurement accuracy
+
+`/measure_crack_width_image` locates the crack with the U-Net, then measures width at full
+photo resolution (sub-pixel FWHM of the intensity profile across the crack).
+
+- **A real scale is required for real mm values.** In the UI, click the two ends of an object
+  of known length (ruler, coin, gauge scale) and enter its length. The camera-distance mode
+  is only a rough guess and can be off by several times.
+- **Resolution limit.** A crack narrower than about 2 px in the photo cannot be measured.
+  For a typical phone photo of a 75-100 mm core (3-4 px/mm) that is about 0.5 mm. Hairline
+  cracks (for example 0.04 mm from a crack gauge) need a macro photo at 100+ px/mm, or the
+  gauge itself. The response includes `min_resolvable_width_mm` and `warnings`.
+- **Gauge check.** Enter your gauge reading in the UI (`lab_reading_mm`) to see the
+  software's error against it.
+- The U-Net can also flag non-crack features (ink marks, aggregate edges, edges of the
+  background). Crop the photo to the crack for best results.
 
 ## Training the models
 

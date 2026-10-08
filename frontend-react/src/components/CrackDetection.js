@@ -10,6 +10,39 @@ const SEVERITY_COLORS = {
   'Extreme':    'var(--rose)',
 };
 
+// Click two points on the photo to mark a reference object of known length.
+// Returns the line length in ORIGINAL image pixels (not screen pixels).
+function ReferenceLineTool({ src, onLength }) {
+  const imgRef = useRef(null);
+  const [pts, setPts] = useState([]);
+
+  const click = (e) => {
+    const img = imgRef.current;
+    if (!img) return;
+    const r = img.getBoundingClientRect();
+    const p = { x: e.clientX - r.left, y: e.clientY - r.top };
+    const next = pts.length >= 2 ? [p] : [...pts, p];
+    setPts(next);
+    if (next.length === 2) {
+      const k = img.naturalWidth / r.width;
+      onLength(Math.hypot(next[1].x - next[0].x, next[1].y - next[0].y) * k);
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%', cursor: 'crosshair', marginBottom: 10 }}>
+      <img ref={imgRef} src={src} alt="Mark reference" onClick={click}
+        style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 8, userSelect: 'none' }} />
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+        {pts.length === 2 && (
+          <line x1={pts[0].x} y1={pts[0].y} x2={pts[1].x} y2={pts[1].y} stroke="#22d3ee" strokeWidth="2" />
+        )}
+        {pts.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="5" fill="#22d3ee" stroke="#000" strokeWidth="1" />)}
+      </svg>
+    </div>
+  );
+}
+
 function CrackDetection({ onNavigate, onDetectionResult }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -23,11 +56,12 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
   const [widthResult, setWidthResult] = useState(null);
   const [widthLoading, setWidthLoading] = useState(false);
   const [widthErr, setWidthErr] = useState(null);
-  const [scaleMode, setScaleMode] = useState('camera');   // 'camera' | 'reference' | 'dpi'
+  const [scaleMode, setScaleMode] = useState('reference');   // 'reference' | 'dpi' | 'camera' (rough estimate)
   const [cameraDistance, setCameraDistance] = useState(50);
   const [refLenPx, setRefLenPx] = useState(0);
   const [refLenMm, setRefLenMm] = useState(25);
   const [dpiVal, setDpiVal] = useState(300);
+  const [labReading, setLabReading] = useState('');
   const [coverMm, setCoverMm] = useState(40);
   const [designLifeYears, setDesignLifeYears] = useState(50);
 
@@ -70,10 +104,15 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
 
   const measureWidth = async () => {
     if (!file) return;
+    if (scaleMode === 'reference' && !(refLenPx > 0 && refLenMm > 0)) {
+      setWidthErr('Mark a reference object first: click its two ends on the photo and enter its real length in mm.');
+      return;
+    }
     setWidthLoading(true);
     setWidthErr(null);
     try {
       const params = {};
+      if (+labReading > 0) params.lab_reading_mm = +labReading;
       if (scaleMode === 'camera')    params.camera_distance_cm = cameraDistance;
       if (scaleMode === 'reference') { params.known_length_px = refLenPx; params.known_length_mm = refLenMm; }
       if (scaleMode === 'dpi')       params.dpi = dpiVal;
@@ -208,12 +247,12 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
           📏 AI Computer Vision Crack Width Measurement
           <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-3)',
                          marginLeft: 10, fontStyle: 'italic' }}>
-            Direct measurement from image pixels via distance transform & skeletonization
+            Sub-pixel width from the image intensity profile across the crack
           </span>
         </div>
 
         <div className="banner info" style={{ marginBottom: 20 }}>
-          This method utilizes our <strong>U-Net segmentation → morphological skeletonization → Euclidean distance transform ($L_2$)</strong> pipeline to directly measure physical crack width (mm) and classify crack severity from the photo.
+          U-Net segmentation locates the crack centre-line; the width is then measured at full photo resolution across the crack edges (sub-pixel). <strong>A real scale (reference object) is required for accurate mm values</strong>, and cracks narrower than ~2 px in the photo cannot be resolved.
         </div>
 
         <div style={{ maxWidth: 640, marginBottom: 20 }}>
@@ -221,7 +260,7 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
             Scale Calibration (how to convert image pixels → physical mm)
           </div>
           <div className="toggle-group" style={{ marginBottom: 14 }}>
-            {[['camera','📷 Camera Distance'],['reference','📐 Reference Object'],['dpi','🖨 Scanner DPI']].map(([k,l]) => (
+            {[['reference','📐 Reference Object (accurate)'],['dpi','🖨 Scanner DPI'],['camera','📷 Camera Distance (rough)']].map(([k,l]) => (
               <button key={k} type="button"
                 className={`toggle-opt ${scaleMode === k ? 'active' : ''}`}
                 onClick={() => setScaleMode(k)} style={{ flex: 1 }}>{l}</button>
@@ -241,17 +280,27 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
                   value={cameraDistance} onChange={e => setCameraDistance(+e.target.value)} style={{ flex: 1 }} />
               </div>
               <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>
-                Typical phone camera photo at arm's length ≈ 50 cm. Closer distance provides higher optical resolution.
+                ⚠ Rough estimate only: assumes a generic phone camera and an uncropped photo. Absolute mm values can be off by several times. Prefer a reference object.
               </p>
             </div>
           )}
 
           {scaleMode === 'reference' && (
             <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.03))', padding: '14px 18px', borderRadius: 10, border: '1px solid var(--border)' }}>
+              {preview ? (
+                <>
+                  <p style={{ fontSize: 12, color: 'var(--text-2)', margin: '0 0 8px' }}>
+                    Click the two ends of an object of known length (ruler, coin, gauge scale) in the photo:
+                  </p>
+                  <ReferenceLineTool key={preview} src={preview} onLength={setRefLenPx} />
+                </>
+              ) : (
+                <p style={{ fontSize: 12, color: 'var(--text-3)' }}>Upload an image first to mark a reference.</p>
+              )}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Reference size in image (px)</label>
-                  <input type="number" className="cw-number-input" value={refLenPx}
+                  <input type="number" className="cw-number-input" value={Math.round(refLenPx * 10) / 10}
                     onChange={e => setRefLenPx(+e.target.value)} min={1} style={{ marginTop: 4, width: '100%' }} />
                 </div>
                 <div>
@@ -278,6 +327,18 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
               </div>
             </div>
           )}
+        </div>
+
+        <div style={{ maxWidth: 640, marginBottom: 20 }}>
+          <div style={{ fontWeight: 600, marginBottom: 10, color: 'var(--text-2)' }}>
+            Lab / Gauge Reading (optional, to check accuracy)
+          </div>
+          <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.03))', padding: '14px 18px', borderRadius: 10, border: '1px solid var(--border)' }}>
+            <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Crack width measured with the gauge at this spot (mm)</label>
+            <input type="number" className="cw-number-input" value={labReading} step="0.01" min={0}
+              placeholder="e.g. 0.04" onChange={e => setLabReading(e.target.value)}
+              style={{ marginTop: 4, width: '100%' }} />
+          </div>
         </div>
 
         <div style={{ maxWidth: 640, marginBottom: 20 }}>
@@ -309,6 +370,23 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
           <div className="anim-scale" style={{ marginTop: 24 }}>
             <div className="hr" />
 
+            {/* Reliability warnings */}
+            {widthResult.warnings?.length > 0 && (
+              <div className="banner error" style={{ marginBottom: 16 }}>
+                <strong>Measurement reliability</strong>
+                <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
+                  {widthResult.warnings.map((w, i) => <li key={i} style={{ fontSize: 13 }}>{w}</li>)}
+                </ul>
+              </div>
+            )}
+            {widthResult.lab_comparison && (
+              <div className="banner info" style={{ marginBottom: 16 }}>
+                Gauge reading <strong>{widthResult.lab_comparison.lab_reading_mm} mm</strong> vs software median{' '}
+                <strong>{widthResult.lab_comparison.measured_median_mm} mm</strong> → error{' '}
+                <strong>{widthResult.lab_comparison.abs_error_mm} mm ({widthResult.lab_comparison.rel_error_pct}%)</strong>
+              </div>
+            )}
+
             {/* Severity Verdict Banner */}
             <div style={{
               padding: '16px 20px', borderRadius: 12, marginBottom: 20,
@@ -328,7 +406,8 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
               <div style={{ marginTop: 6, fontSize: 13, color: 'var(--text-1)' }}>
                 Design Crack Width (p95): <strong>{widthResult.p95_width_mm} mm</strong>
                 &nbsp;·&nbsp;
-                Scale: {widthResult.scale_method.replace(/_/g, ' ')} ({widthResult.pixels_per_mm.toFixed(1)} px/mm)
+                Scale: {widthResult.scale_method.replace(/_/g, ' ')}{widthResult.scale_reliable ? '' : ' (estimate)'} ({widthResult.pixels_per_mm.toFixed(1)} px/mm)
+                &nbsp;·&nbsp;Method: {widthResult.width_method === 'subpixel_profile' ? 'sub-pixel intensity profile' : 'coarse mask (fallback)'}
               </div>
               <div style={{ marginTop: 8, fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>
                 {widthResult.severity_description}
