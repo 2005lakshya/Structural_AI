@@ -29,4 +29,4 @@ python -m pytest tests
 * The real-camera printed-chart experiment (`scripts/width_test_chart.py`) has **not** been run on physical prints.
 * The 2-D study uses 4 of 36 images (one image, two stages, two series).
 * `outputs/krkCMd/all_measurements.csv.gz` (~100 MB uncompressed) is not committed; regenerate with step 1.
-* The paper source was written without a LaTeX toolchain available and has not been compiled.
+* The manuscript itself is not in this repository; `paper/` holds only figures, the bibliography and notes.
