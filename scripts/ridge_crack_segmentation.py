@@ -37,6 +37,8 @@ def segment_cracks(
     min_skeleton_px: int = 25,
     min_elongation: float = 2.0,
     exclude_boxes: Optional[Sequence[Tuple[int, int, int, int]]] = None,
+    bg_sigma_px: float = 15.0,
+    min_darkness: float = 6.0,
 ) -> np.ndarray:
     """Return uint8 mask (255 = crack), same size as the input image."""
     h, w = image_bgr.shape[:2]
@@ -44,14 +46,14 @@ def segment_cracks(
     gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)[y:y + rh, x:x + rw]
 
     # Flatten slow illumination so the ridge response reflects local contrast only.
-    bg = cv2.GaussianBlur(gray, (0, 0), 15)
+    bg = cv2.GaussianBlur(gray, (0, 0), bg_sigma_px)
     flat = gray - bg
 
     ridge = sato(flat, sigmas=sigmas, black_ridges=True)
     thr = np.percentile(ridge, percentile)
     binary = (ridge > thr).astype(np.uint8)
     # Cracks must also be darker than their surroundings (not merely edges).
-    binary &= (flat < -6.0).astype(np.uint8)
+    binary &= (flat < -min_darkness).astype(np.uint8)
 
     # Hand-drawn marks (ink, tally lines, labels) look like cracks to any ridge filter.
     # A near-black intensity cut was tried and rejected: it removes the darkest REAL

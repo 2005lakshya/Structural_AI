@@ -1,0 +1,105 @@
+{
+ "best": {
+  "percentile": 96.0,
+  "elong": 1.5,
+  "dark": 8.0
+ },
+ "log": [
+  {
+   "percentile": 94.0,
+   "elong": 1.5,
+   "dark": 4.0,
+   "mae_um": 145.2,
+   "hit": 1.0,
+   "score": 145.2
+  },
+  {
+   "percentile": 94.0,
+   "elong": 1.5,
+   "dark": 8.0,
+   "mae_um": 145.2,
+   "hit": 1.0,
+   "score": 145.2
+  },
+  {
+   "percentile": 94.0,
+   "elong": 2.5,
+   "dark": 4.0,
+   "mae_um": 145.2,
+   "hit": 1.0,
+   "score": 145.2
+  },
+  {
+   "percentile": 94.0,
+   "elong": 2.5,
+   "dark": 8.0,
+   "mae_um": 145.2,
+   "hit": 1.0,
+   "score": 145.2
+  },
+  {
+   "percentile": 96.0,
+   "elong": 1.5,
+   "dark": 4.0,
+   "mae_um": 144.0,
+   "hit": 1.0,
+   "score": 144.0
+  },
+  {
+   "percentile": 96.0,
+   "elong": 1.5,
+   "dark": 8.0,
+   "mae_um": 144.0,
+   "hit": 1.0,
+   "score": 144.0
+  },
+  {
+   "percentile": 96.0,
+   "elong": 2.5,
+   "dark": 4.0,
+   "mae_um": 144.0,
+   "hit": 1.0,
+   "score": 144.0
+  },
+  {
+   "percentile": 96.0,
+   "elong": 2.5,
+   "dark": 8.0,
+   "mae_um": 144.0,
+   "hit": 1.0,
+   "score": 144.0
+  },
+  {
+   "percentile": 97.5,
+   "elong": 1.5,
+   "dark": 4.0,
+   "mae_um": 140.7,
+   "hit": 0.972,
+   "score": 144.7
+  },
+  {
+   "percentile": 97.5,
+   "elong": 1.5,
+   "dark": 8.0,
+   "mae_um": 140.7,
+   "hit": 0.972,
+   "score": 144.7
+  },
+  {
+   "percentile": 97.5,
+   "elong": 2.5,
+   "dark": 4.0,
+   "mae_um": 140.7,
+   "hit": 0.972,
+   "score": 144.7
+  },
+  {
+   "percentile": 97.5,
+   "elong": 2.5,
+   "dark": 8.0,
+   "mae_um": 140.7,
+   "hit": 0.972,
+   "score": 144.7
+  }
+ ]
+}

@@ -77,3 +77,19 @@ def test_fwhm_from_profile_rejects_flat_profile():
     from scripts.crack_width_measure import fwhm_from_profile
     t = np.arange(-20, 20.01, 0.5)
     assert fwhm_from_profile(np.full_like(t, 170.0), t) is None
+
+
+def test_error_model_planner_floor_and_monotonic():
+    from scripts.resolution_error_model import expected_mae_um, required_px_per_mm
+    params = dict(a_um=56.0, c=0.0324, k=1.65, noskill_mae_um=112.0)
+    assert expected_mae_um(8, params) > expected_mae_um(25, params)
+    assert required_px_per_mm(0.04, 0.25, params) is None        # below the floor
+    need = required_px_per_mm(0.5, 0.25, params)
+    assert need is not None and expected_mae_um(need, params) <= 0.25 * 500 + 1e-6
+
+
+def test_chart_selftest_recovers_wide_lines():
+    from scripts.width_test_chart import selftest
+    res = selftest()
+    assert abs(res[20.0][0.5] - 0.5) < 0.05
+    assert abs(res[10.0][1.0] - 1.0) < 0.1

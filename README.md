@@ -246,6 +246,15 @@ crack profiles (krkCMd dataset, CC BY 4.0) re-imaged at 2.5-252 px/mm. Error is 
 and rises steeply below ~12 px/mm; sub-pixel interpolation helps only at the coarse end; the method is
 NOT more accurate than the dataset's own deep-learning benchmark. Read the "does NOT support" section.
 
+**Resolution study, error model and planner.** On 14,198 real crack profiles re-imaged at 2.5-252 px/mm
+(`docs/RESULTS_krkCMd.md`) and an end-to-end 2-D check on held-out specimens (`docs/RESULTS_krkCMd_2D.md`):
+mean error is ~56 um down to 25 px/mm, 141 um at 8 px/mm and 423 um at 3.6 px/mm; below ~8-12 px/mm
+the width is no better than guessing the dataset's average (112 um). `scripts/resolution_error_model.py plan`
+turns this into a camera-distance rule. `scripts/width_test_chart.py` generates a printable known-width chart and
+analyses photos of it (the real-camera experiment is NOT yet run). The paper source is in `paper/`
+(not compiled in the original environment); `paper/REPRODUCIBILITY.md` lists exact commands and
+`paper/REVIEWER_CRITIQUE.md` the open weaknesses.
+
 **Hairline cracks (e.g. 0.04 mm).** At a typical 3-4 px/mm core photo, 0.04 mm is ~0.15 px
 wide and cannot be measured from the image. `/measure_crack_width_ridge` reports the *apparent*
 optical width and states when a supplied `gauge_reading_mm` is below the photo's resolution.

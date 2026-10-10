@@ -65,3 +65,13 @@ curl -L -o data/krkCMd_raw/krkCMd_table.csv https://zenodo.org/api/records/14568
 python scripts/evaluate_resolution_krkCMd.py --csv data/krkCMd_raw/krkCMd_table.csv --out outputs/krkCMd
 ```
 (about 20 min on a laptop CPU; `--max-profiles 400` for a quick check). Seeds are fixed.
+
+## Update: error model and no-skill baseline
+* Fitted model (phone-like): MAE(p) = 56.0 + 0.0324 * p^1.65 um (p = pixel pitch in um); pooled RMSE 8.8 um;
+  leave-one-series-out prediction error 23-33 %. See `docs/results/resolution_error_model.json`.
+* A constant "always predict the mean width" baseline has MAE 112 um. Our uncalibrated estimator is worse than this at
+  <= 5 px/mm, and even after leave-one-series-out calibration it only matches it at 3.6 px/mm: below ~8-12 px/mm
+  the measured width carries essentially no information beyond the population mean.
+* The error's dependence on width: relative error does not collapse onto a function of "pixels across the crack" because a
+  roughly constant ~55 um definitional offset dominates at fine resolution.
+* End-to-end 2-D confirmation on held-out specimens: `docs/RESULTS_krkCMd_2D.md`.

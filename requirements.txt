@@ -27,3 +27,6 @@ langchain-google-genai
 python-dotenv
 scipy
 scikit-image
+remotezip
+tifffile
+pytest
