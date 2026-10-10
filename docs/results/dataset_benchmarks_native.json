@@ -1,0 +1,22 @@
+{
+ "DLMwidth": {
+  "n": 14198,
+  "detect_rate": 0.9988,
+  "mae_um": 14.92,
+  "median_abs_err_um": 7.79,
+  "bias_um": -5.25,
+  "median_rel_err_pct": 4.6,
+  "within_25pct": 0.86,
+  "within_50pct": 0.94
+ },
+ "AEDwidth": {
+  "n": 14198,
+  "detect_rate": 0.9909,
+  "mae_um": 37.97,
+  "median_abs_err_um": 27.78,
+  "bias_um": -36.46,
+  "median_rel_err_pct": 18.2,
+  "within_25pct": 0.636,
+  "within_50pct": 0.895
+ }
+}

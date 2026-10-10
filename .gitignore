@@ -98,3 +98,6 @@ temp/
 # =============================
 secrets.py
 config_local.py
+
+# downloaded third-party dataset (see docs/RESULTS_krkCMd.md for the download command)
+data/krkCMd_raw/

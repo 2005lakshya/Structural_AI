@@ -214,37 +214,46 @@ def _profile_widths(
     prof = map_coordinates(gray, [py, px], order=1, mode="nearest")
 
     widths = []
-    T = len(t)
-    edge = max(2, int(0.2 * T))
     for row in prof:
-        lo = int(0.2 * T)
-        hi = int(0.8 * T)
-        imin = lo + int(np.argmin(row[lo:hi]))
-        vmin = row[imin]
-        base = 0.5 * (np.median(row[:edge]) + np.median(row[-edge:]))
-        depth = base - vmin
-        if depth < 10.0:                 # no real dark dip here
-            continue
-        half = vmin + 0.5 * depth
-
-        i = imin
-        while i > 0 and row[i] < half:
-            i -= 1
-        if row[i] < half:                # never crossed
-            continue
-        tl = t[i] + (row[i] - half) / max(row[i] - row[i + 1], 1e-6) * (t[i + 1] - t[i])
-
-        j = imin
-        while j < T - 1 and row[j] < half:
-            j += 1
-        if row[j] < half:
-            continue
-        tr = t[j - 1] + (half - row[j - 1]) / max(row[j] - row[j - 1], 1e-6) * (t[j] - t[j - 1])
-
-        w = tr - tl
-        if 0.3 <= w <= 2.0 * R * 0.8:
+        w = fwhm_from_profile(row, t)
+        if w is not None:
             widths.append(w)
     return np.asarray(widths, dtype=np.float32)
+
+
+def fwhm_from_profile(row: np.ndarray, t: np.ndarray, min_depth: float = 10.0):
+    """Full width at half maximum (same units as `t`) of the dark dip in a 1-D
+    intensity profile, with linear interpolation of both half-height crossings.
+    Returns None when there is no clear dip. Used by the image pipeline and by the
+    real-data resolution experiment (scripts/evaluate_resolution_krkCMd.py)."""
+    T = len(t)
+    edge = max(2, int(0.2 * T))
+    lo = int(0.2 * T)
+    hi = int(0.8 * T)
+    imin = lo + int(np.argmin(row[lo:hi]))
+    vmin = row[imin]
+    base = 0.5 * (np.median(row[:edge]) + np.median(row[-edge:]))
+    depth = base - vmin
+    if depth < min_depth:
+        return None
+    half = vmin + 0.5 * depth
+
+    i = imin
+    while i > 0 and row[i] < half:
+        i -= 1
+    if row[i] < half:
+        return None
+    tl = t[i] + (row[i] - half) / max(row[i] - row[i + 1], 1e-6) * (t[i + 1] - t[i])
+
+    j = imin
+    while j < T - 1 and row[j] < half:
+        j += 1
+    if row[j] < half:
+        return None
+    tr = t[j - 1] + (half - row[j - 1]) / max(row[j] - row[j - 1], 1e-6) * (t[j] - t[j - 1])
+
+    w = tr - tl
+    return float(w) if 0.3 <= w <= 2.0 * (t[-1]) * 0.8 else None
 
 
 # ─────────────────────────────────────────────────────────────────────────────

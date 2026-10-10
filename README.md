@@ -241,6 +241,11 @@ within about 7 %; below ~2 px the estimate is dominated by optical blur (a 0.5 p
 as ~2 px). This is the physical floor of any photo-based method, not a bug. It is a synthetic
 benchmark; it does not replace gauge-referenced real photos.
 
+**Real-data resolution study.** `docs/RESULTS_krkCMd.md` evaluates the width measurement on 14,198 real
+crack profiles (krkCMd dataset, CC BY 4.0) re-imaged at 2.5-252 px/mm. Error is flat above ~25 px/mm
+and rises steeply below ~12 px/mm; sub-pixel interpolation helps only at the coarse end; the method is
+NOT more accurate than the dataset's own deep-learning benchmark. Read the "does NOT support" section.
+
 **Hairline cracks (e.g. 0.04 mm).** At a typical 3-4 px/mm core photo, 0.04 mm is ~0.15 px
 wide and cannot be measured from the image. `/measure_crack_width_ridge` reports the *apparent*
 optical width and states when a supplied `gauge_reading_mm` is below the photo's resolution.

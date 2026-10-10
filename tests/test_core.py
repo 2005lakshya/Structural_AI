@@ -62,3 +62,18 @@ def test_ridge_filter_ignores_dark_blob():
     img = np.full((300, 300, 3), 170, np.uint8)
     cv2.circle(img, (150, 150), 60, (40, 40, 40), -1)
     assert segment_cracks(img).sum() == 0
+
+
+def test_fwhm_from_profile_recovers_gaussian_dip_width():
+    from scripts.crack_width_measure import fwhm_from_profile
+    t = np.arange(-20, 20.01, 0.5)
+    sigma = 3.0
+    row = 170 - 90 * np.exp(-0.5 * (t / sigma) ** 2)
+    w = fwhm_from_profile(row, t)
+    assert abs(w - 2.3548 * sigma) < 0.2
+
+
+def test_fwhm_from_profile_rejects_flat_profile():
+    from scripts.crack_width_measure import fwhm_from_profile
+    t = np.arange(-20, 20.01, 0.5)
+    assert fwhm_from_profile(np.full_like(t, 170.0), t) is None
