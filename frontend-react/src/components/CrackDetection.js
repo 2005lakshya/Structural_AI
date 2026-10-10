@@ -200,6 +200,11 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
             <div className="empty"><h4>No results</h4><p>Upload an image and run detection</p></div>
           ) : (
             <div className="anim-scale">
+              {results.warning && (
+                <div style={{ background: '#fff4e5', border: '1px solid #f5a623', borderRadius: 10, padding: '10px 14px', marginBottom: 16, color: '#7a4a00', fontSize: 14 }}>
+                  <strong>Low reliability:</strong> {results.warning}
+                </div>
+              )}
               <div className="metrics-row" style={{ marginBottom: 16 }}>
                 <div className="m-card purple"><div className="m-label">Detections</div>
                   <div className="m-value">{results.count}</div></div>

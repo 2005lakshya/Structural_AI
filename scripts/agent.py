@@ -116,7 +116,7 @@ RECOMMENDED ACTIONS
 
 
 def llm_recommendation(inputs: dict, predictions: dict, api_key: str) -> str:
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.3, google_api_key=api_key)
+    llm = ChatGoogleGenerativeAI(model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"), temperature=0.3, google_api_key=api_key)
     prompt = f"""You are a senior structural health monitoring engineer. Analyze the following building inspection data and provide a professional technical report with clear findings and actionable recommendations.
 
 BUILDING DATA:

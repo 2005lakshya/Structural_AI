@@ -4,7 +4,7 @@ import io
 import base64
 import tempfile
 import math
-from typing import Optional
+from typing import List, Optional
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
@@ -49,6 +49,30 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 class DoubleConv:
     pass
+
+
+
+def detection_reliability(detections, image_shape):
+    """Fraction of the image covered by detector boxes + a plain-language warning.
+
+    The detectors were trained on tightly cropped concrete-surface patches. On a
+    full scene (hands, furniture, background) they fire almost everywhere; when
+    boxes cover most of the frame the output should not be trusted.
+    """
+    h, w = image_shape[:2]
+    cover = np.zeros((h, w), dtype=np.uint8)
+    for d in detections:
+        x1, y1, x2, y2 = [int(v) for v in d["bbox"]]
+        cover[max(y1, 0):max(y2, 0), max(x1, 0):max(x2, 0)] = 1
+    frac = float(cover.mean()) if cover.size else 0.0
+    warning = None
+    if frac > 0.5:
+        warning = (
+            f"Boxes cover {frac*100:.0f}% of the image, which means the detector is not "
+            "discriminating. It was trained on close-up concrete patches; crop to the "
+            "concrete surface and retry."
+        )
+    return round(frac, 3), warning
 
 
 def encode_image(image_array) -> str:
@@ -310,10 +334,13 @@ async def detect_cracks(file: UploadFile = File(...)):
         detector_name = "swin_transformer"
     else:
         detector_name = "cracknet_cnn"
+    coverage, warning = detection_reliability(result["detections"], img.shape)
     return {
         "detections": result["detections"],
         "count":      result["count"],
         "detector":   detector_name,
+        "box_coverage_fraction": coverage,
+        "warning":    warning,
     }
 
 
@@ -372,6 +399,8 @@ async def analyze_image(file: UploadFile = File(...)):
         "detector": detector_name,
         "annotated_image_b64": encode_image(annotated),
         "mask_image_b64": encode_image(colored_mask),
+        "box_coverage_fraction": detection_reliability(detections, img.shape)[0],
+        "warning": detection_reliability(detections, img.shape)[1],
         "crack_area": crack_area,
         "total_px": total_px,
         "density": density,
@@ -599,11 +628,15 @@ def model_performance():
     if os.path.exists(unet_path):
         state = torch.load(unet_path, map_location=DEVICE, weights_only=True)
         total_params = sum(p.numel() for p in state.values())
+        # The checkpoint stores only weights, so the Dice cannot be recomputed here
+        # (the segmentation dataset is not shipped). 0.7345 is the value logged at
+        # training time and is reported as such, not as a fresh measurement.
         best_dice = 0.7345
 
     unet_metrics = {
         "best_dice": best_dice,
         "params": total_params,
+        "dice_source": "training log (not recomputed; dataset not shipped with the repo)",
     }
 
     # CrackNet
@@ -650,7 +683,7 @@ def chat_endpoint(data: ChatRequest):
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
             temperature=0.3,
             google_api_key=api_key,
         )
@@ -932,6 +965,86 @@ async def measure_crack_width_image(
     }
 
 
+
+@app.post("/measure_crack_width_ridge")
+async def measure_crack_width_ridge(
+    file: UploadFile = File(...),
+    roi: str = "",                 # "x,y,w,h" of the concrete surface in pixels (strongly recommended)
+    exclude: str = "",             # "x,y,w,h;x,y,w,h" areas with ink/labels to ignore
+    known_length_px: float = 0.0,
+    known_length_mm: float = 0.0,
+    gauge_reading_mm: float = 0.0,
+    exposure: str = "moderate",
+):
+    """
+    Training-free crack width measurement (multi-scale ridge filter + sub-pixel
+    intensity-profile width). Unlike /measure_crack_width_image it does not use the
+    learned U-Net, which fails on full-scene photos. Reports the optical (apparent)
+    width and states whether the requested precision is physically attainable.
+    """
+    import cv2 as _cv2
+    from scripts.ridge_crack_segmentation import segment_cracks
+    from scripts.crack_width_measure import measure_crack_width, MIN_RELIABLE_WIDTH_PX
+
+    contents = await file.read()
+    img = _cv2.imdecode(np.frombuffer(contents, np.uint8), _cv2.IMREAD_COLOR)
+    if img is None:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
+
+    def _boxes(text):
+        out = []
+        for part in filter(None, text.split(";")):
+            vals = [int(float(v)) for v in part.split(",")]
+            if len(vals) != 4:
+                raise HTTPException(status_code=400, detail="ROI/exclude boxes must be 'x,y,w,h'.")
+            out.append(tuple(vals))
+        return out
+
+    roi_box = _boxes(roi)
+    mask = segment_cracks(img, roi=roi_box[0] if roi_box else None, exclude_boxes=_boxes(exclude))
+    result = measure_crack_width(mask, img, known_length_px=known_length_px,
+                                 known_length_mm=known_length_mm, exposure=exposure)
+    warnings = list(result.warnings)
+    if not roi_box:
+        warnings.append("No ROI given: background objects can be picked up as cracks. Pass roi='x,y,w,h'.")
+
+    comparison = None
+    if gauge_reading_mm > 0:
+        ppm = result.pixels_per_mm
+        gauge_px = gauge_reading_mm * ppm
+        comparison = {
+            "gauge_reading_mm": gauge_reading_mm,
+            "gauge_width_in_pixels": round(gauge_px, 3),
+            "optical_median_mm": result.median_width_mm,
+            "resolvable": gauge_px >= MIN_RELIABLE_WIDTH_PX,
+            "note": ("The gauge width is below the optical resolution of this photo; the image "
+                     "measurement is an apparent width (shadow / edge spalling / dirt), not the aperture.")
+                    if gauge_px < MIN_RELIABLE_WIDTH_PX else "Gauge width is resolvable in this photo.",
+        }
+        if gauge_px < MIN_RELIABLE_WIDTH_PX:
+            warnings.append(comparison["note"])
+
+    overlay_b64 = encode_image(_cv2.cvtColor(result.overlay_image, _cv2.COLOR_BGR2RGB)) if result.overlay_image is not None else ""
+    return {
+        "crack_pixels": result.crack_pixels,
+        "skeleton_length_px": result.skeleton_length_px,
+        "width_method": result.width_method,
+        "valid_profile_count": result.valid_profile_count,
+        "median_width_px": round(result.median_width_px, 2),
+        "p95_width_px": round(result.p95_width_px, 2),
+        "median_width_mm": result.median_width_mm,
+        "p95_width_mm": result.p95_width_mm,
+        "pixels_per_mm": round(result.pixels_per_mm, 3),
+        "scale_method": result.scale_method,
+        "scale_reliable": result.scale_reliable,
+        "min_resolvable_width_mm": result.min_resolvable_width_mm,
+        "gauge_comparison": comparison,
+        "severity_level": result.severity.get("level", ""),
+        "warnings": warnings,
+        "overlay_image_b64": overlay_b64,
+    }
+
+
 class DurabilityImpactInput(BaseModel):
     width_mm: float = 0.3
     cover_mm: float = 40.0
@@ -1146,6 +1259,10 @@ class UnifiedPipelineParams(BaseModel):
     clear_cover_mm: float = 40.0          # Concrete clear cover
     applied_service_load_kN: float = 65.0 # Operational service load
     crack_length_mm: float = 1000.0       # Longitudinal fissure length
+    pixels_per_mm: float = 2.0            # Image scale; set from a reference object for real units
+    roi: Optional[List[int]] = None       # [x, y, w, h] of the concrete surface in the photo
+    exclude: Optional[List[List[int]]] = None  # [[x, y, w, h], ...] ink / label regions to ignore
+    void_volume_ml: Optional[float] = None     # measured/known void volume; stage 3 only runs if given
 
 
 class PumpSimStepInput(BaseModel):
@@ -1186,7 +1303,10 @@ async def run_unified_invention_pipeline(
         img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
         if img is not None:
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            mask = run_unet_mask(img_rgb)
+            from scripts.ridge_crack_segmentation import segment_cracks
+            # Ridge segmentation, not the U-Net: the U-Net marks shadows/clothing on full-scene photos.
+            mask = segment_cracks(img, roi=tuple(params.roi) if params.roi else None,
+                                  exclude_boxes=[tuple(b) for b in (params.exclude or [])])
 
     # Fallback to test image if no valid upload provided
     if img_rgb is None:
@@ -1214,7 +1334,7 @@ async def run_unified_invention_pipeline(
     from scripts.grouting_controller import generate_grouting_profile, simulate_injection_step
 
     # Extract continuous 2D skeleton points
-    skeleton_points = extract_crack_morphology(skeleton, dist_transform, pixels_per_mm=2.0)
+    skeleton_points = extract_crack_morphology(skeleton, dist_transform, pixels_per_mm=params.pixels_per_mm)
 
     # STAGE 1: Optically-Guided Acoustic 3D Inversion
     inversion_res = solve_optically_guided_acoustic_inversion(
@@ -1246,15 +1366,17 @@ async def run_unified_invention_pipeline(
         applied_service_load_kN=params.applied_service_load_kN,
     )
 
-    # STAGE 3: Closed-Loop Adaptive Epoxy Grouting & Smart Pump Profile
-    grouting_res = generate_grouting_profile(
-        void_volume_ml=inversion_res.internal_void_volume_cm3,
-        crack_width_mm=max_w,
-        crack_depth_mm=inversion_res.max_depth_mm,
-        crack_length_mm=params.crack_length_mm,
-        concrete_tensile_strength_mpa=0.7 * math.sqrt(params.f_ck_mpa),
-        clear_cover_mm=params.clear_cover_mm,
-    )
+    # STAGE 3: Grouting plan. Needs a void volume; the software no longer guesses one.
+    grouting_res = None
+    if params.void_volume_ml is not None and params.void_volume_ml > 0:
+        grouting_res = generate_grouting_profile(
+            void_volume_ml=params.void_volume_ml,
+            crack_width_mm=max_w,
+            crack_depth_mm=inversion_res.max_depth_mm,
+            crack_length_mm=params.crack_length_mm,
+            concrete_tensile_strength_mpa=0.7 * math.sqrt(params.f_ck_mpa),
+            clear_cover_mm=params.clear_cover_mm,
+        )
 
     # Visual overlay encoding
     colored_mask = cv2.applyColorMap(mask, cv2.COLORMAP_HOT)
@@ -1265,15 +1387,12 @@ async def run_unified_invention_pipeline(
         "mask_image_b64": mask_b64,
         "stage1_inversion": {
             "max_depth_mm": inversion_res.max_depth_mm,
-            "mean_depth_mm": inversion_res.mean_depth_mm,
             "penetration_pct": inversion_res.penetration_pct,
-            "internal_void_volume_cm3": inversion_res.internal_void_volume_cm3,
             "surface_tortuosity": inversion_res.surface_tortuosity,
+            "surface_length_mm": inversion_res.surface_length_mm,
             "acoustic_velocity_km_s": inversion_res.acoustic_diffraction_velocity_km_s,
             "rebar_breached": inversion_res.rebar_breached,
             "neutral_axis_breached": inversion_res.neutral_axis_breached,
-            "points_3d": inversion_res.points_3d,
-            "depth_profile": inversion_res.depth_profile,
             "width_profile": inversion_res.width_profile,
             "summary": inversion_res.summary,
         },
@@ -1294,7 +1413,7 @@ async def run_unified_invention_pipeline(
             "physics_audit_log": physics_res.physics_audit_log,
             "capacity_curve": physics_res.capacity_curve,
         },
-        "stage3_grouting": {
+        "stage3_grouting": None if grouting_res is None else {
             "total_void_volume_ml": grouting_res.total_void_volume_ml,
             "recommended_resin_type": grouting_res.recommended_resin_type,
             "resin_viscosity_mpa_s": grouting_res.resin_viscosity_mpa_s,
@@ -1306,6 +1425,7 @@ async def run_unified_invention_pipeline(
             "flow_profile_timeline": grouting_res.flow_profile_timeline,
             "hardware_telemetry": grouting_res.hardware_telemetry,
         },
+        "stage3_note": None if grouting_res is not None else "Grouting plan skipped: pass void_volume_ml (measured or known) in params_json.",
     }
 
 

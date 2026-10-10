@@ -148,6 +148,13 @@ class CrackWidthResult:
 # upper bound, not a measurement.
 MIN_RELIABLE_WIDTH_PX = 2.0
 
+# The grayscale image is smoothed with a Gaussian of this sigma before profiling.
+# Gaussian blurs add in quadrature to a Gaussian-like line, so the FWHM of the
+# smoothing is removed from every profile width (validated in
+# scripts/validate_width_synthetic.py). Camera blur is NOT known and is not removed.
+PREBLUR_SIGMA_PX = 0.8
+PREBLUR_FWHM_PX = 2.3548 * PREBLUR_SIGMA_PX
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Sub-pixel width from the real image intensity profile
@@ -313,13 +320,13 @@ def measure_crack_width(
     # Fallback : 2 x distance-transform radius of the (coarse) mask.
     skel_ys, skel_xs = np.where(skeleton > 0)
     gray = cv2.cvtColor(original_bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
-    gray = cv2.GaussianBlur(gray, (0, 0), 0.8)
+    gray = cv2.GaussianBlur(gray, (0, 0), PREBLUR_SIGMA_PX)
     prof_widths = _profile_widths(gray, skeleton, dist_transform)
     n_sampled = min(len(skel_ys), 600)
     result.valid_profile_count = int(len(prof_widths))
 
     if len(prof_widths) >= 5 and len(prof_widths) >= 0.3 * n_sampled:
-        widths_px = prof_widths
+        widths_px = np.sqrt(np.clip(prof_widths ** 2 - PREBLUR_FWHM_PX ** 2, 0.0, None))
         result.width_method = "subpixel_profile"
     else:
         widths_px = dist_transform[skel_ys, skel_xs] * 2.0

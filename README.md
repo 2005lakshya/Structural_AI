@@ -111,10 +111,14 @@ outputs/                 SHAP plots, benchmark results
 ### Backend
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate
+conda create -n structural_ai python=3.11
+conda activate structural_ai
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121   # or the CPU build
 pip install -r requirements.txt
 ```
+
+If port 8000 is already in use on your machine, set `STRUCTURALAI_PORT` (backend) and
+`REACT_APP_API_URL` (frontend), e.g. `http://127.0.0.1:8010`.
 
 `requirements.txt` now includes `langchain-google-genai`, `python-dotenv`, `scipy` and
 `scikit-image`.
@@ -228,16 +232,60 @@ python scripts/generate_tabular_data.py # regenerate synthetic tabular dataset
 The legacy YOLOv8 pipeline (superseded by CrackNet/SwinCrackNet, no longer called from the
 backend) can still be trained with `python scripts/train.py`.
 
+## Validation and limits (read before citing any number)
+
+**Width measurement.** `python scripts/validate_width_synthetic.py` renders cracks of known
+width on a noisy texture, blurs like a camera, and measures them (output:
+`outputs/width_validation.csv`). Result with this code: cracks >= 4 px wide are measured
+within about 7 %; below ~2 px the estimate is dominated by optical blur (a 0.5 px crack reads
+as ~2 px). This is the physical floor of any photo-based method, not a bug. It is a synthetic
+benchmark; it does not replace gauge-referenced real photos.
+
+**Hairline cracks (e.g. 0.04 mm).** At a typical 3-4 px/mm core photo, 0.04 mm is ~0.15 px
+wide and cannot be measured from the image. `/measure_crack_width_ridge` reports the *apparent*
+optical width and states when a supplied `gauge_reading_mm` is below the photo's resolution.
+Resolving 0.04 mm needs >= 50 px/mm (macro lens or microscope) or the gauge itself.
+
+**Segmentation.** The learned U-Net and the sliding-window detectors were trained on tightly
+cropped concrete patches and fail on full-scene photos (they flag clothing, shadows, hands).
+Responses now include `box_coverage_fraction` and a `warning` when boxes cover > 50 % of the
+frame. For full-scene photos use `/measure_crack_width_ridge` (training-free ridge filter) with
+an `roi`; mark ink/labels with `exclude` boxes. It can still pick up aggregate edges and marks.
+
+**Risk / SHI / RUL models** are trained on 350 rows generated from a formula plus noise
+(`scripts/generate_tabular_data.py`). Their accuracy shows they learned that formula, not
+that they predict real buildings. The repair cost is a fixed formula. The risk model does
+not recover the "Safe" class on the held-out split.
+
+**Reported U-Net Dice (0.7345)** is the value logged at training time; it cannot be recomputed
+because the segmentation dataset is not in the repo. `/model_performance` labels it as such.
+
+**Acoustic-optical stage** (`scripts/acoustic_optical_inversion.py`) combines the measured
+surface trace/widths from the photo with ONE measured UPV depth (IS 13311). It does not estimate
+a depth profile or void volume (an earlier assumption-based version was removed because it was
+not validated). The grouting plan only runs when you supply `void_volume_ml` yourself. The
+default UPV times (`t1_us`, `t2_us`) are placeholders; enter your own readings.
+
 ## Known issues
 
-- `scripts/acoustic_optical_inversion.py` — imported by `backend/main.py` for the
-  `/api/unified_invention_pipeline` endpoint — is missing from the working tree (only a
-  compiled `.pyc` remains). That endpoint will raise an `ImportError` until the source file is
-  recovered or rewritten.
-- The `/api/unified_invention_pipeline` and `/api/pump/simulate_step` endpoints are not yet
-  wired into the React UI (API-only).
-- `TinyUNet` is defined independently in three places (`backend/main.py`,
-  `scripts/train_unet.py`, `scripts/extract_features.py`) rather than a shared module.
+- The image datasets listed above are not in the repository; retraining the vision models
+  requires downloading them first.
+- The CrackNet checkpoint is from epoch 2 (val acc 0.66); the Swin checkpoint is from the
+  first head-only phase. The PI-CrackNet checkpoint (val acc 0.888) is the one used.
+- `TinyUNet` is defined in three places (`backend/main.py`, `scripts/train_unet.py`,
+  `scripts/extract_features.py`).
+- Saved sklearn/XGBoost models were pickled with scikit-learn 1.9.0 and warn on 1.9.1;
+  re-run `python scripts/train_ml.py` to regenerate them.
+- Chat/LLM report needs `GEMINI_API_KEY`; the model name is set with `GEMINI_MODEL`
+  (default `gemini-2.5-flash`, untested without a key). Copy `.env.example` to `.env`.
+- `/api/unified_invention_pipeline` and `/api/pump/simulate_step` are API-only (not in the UI).
+
+## Tests
+
+```bash
+pip install pytest
+python -m pytest tests
+```
 
 ## License and dataset attribution
 
