@@ -143,6 +143,10 @@ class CrackWidthResult:
     min_resolvable_width_mm: float = 0.0
     warnings:            List[str] = field(default_factory=list)
 
+    # Resolution-robust photometric width, 90 % interval and certified decision
+    # (photometric_assessment; empty dict when not available)
+    photometric:         dict  = field(default_factory=dict)
+
 
 # Below this many pixels the crack edge blur dominates and the width is only an
 # upper bound, not a measurement.
@@ -160,28 +164,12 @@ PREBLUR_FWHM_PX = 2.3548 * PREBLUR_SIGMA_PX
 #  Sub-pixel width from the real image intensity profile
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _profile_widths(
-    gray: np.ndarray,
-    skeleton: np.ndarray,
-    dist_transform: np.ndarray,
-    max_points: int = 600,
-) -> np.ndarray:
-    """
-    Measure crack width at full image resolution.
-
-    The U-Net mask is only used to find the crack centre-line.  At sampled
-    centre-line points we cut a profile perpendicular to the crack in the
-    ORIGINAL grayscale image and take the full width at half maximum (FWHM)
-    of the dark dip, with linear interpolation -> sub-pixel width.
-
-    Returns an array of widths in pixels (possibly empty).
-    """
-    from scipy.ndimage import map_coordinates
-
+def _centres_and_normals(skeleton: np.ndarray, max_points: int = 600):
+    """Sampled centre-line points (y, x) and unit normals (dy, dx) of the crack skeleton."""
     ys, xs = np.where(skeleton > 0)
     n = len(ys)
     if n < 5:
-        return np.empty(0)
+        return np.empty((0, 2), np.float32), np.empty((0, 2), np.float32)
 
     step = max(1, n // max_points)
     sel = np.arange(0, n, step)
@@ -202,7 +190,29 @@ def _profile_widths(
         normals[i] = (tx, -ty)           # (dy, dx) of the normal
 
     ok = ~np.isnan(normals[:, 0])
-    centres, normals = centres[ok], normals[ok]
+    return centres[ok], normals[ok]
+
+
+def _profile_widths(
+    gray: np.ndarray,
+    skeleton: np.ndarray,
+    dist_transform: np.ndarray,
+    max_points: int = 600,
+) -> np.ndarray:
+    """
+    Measure crack width at full image resolution.
+
+    The U-Net mask is only used to find the crack centre-line.  At sampled
+    centre-line points we cut a profile perpendicular to the crack in the
+    ORIGINAL grayscale image and take the full width at half maximum (FWHM)
+    of the dark dip, with linear interpolation -> sub-pixel width.
+
+    Returns an array of widths in pixels (possibly empty).
+    """
+    from scipy.ndimage import map_coordinates
+
+    ys, xs = np.where(skeleton > 0)
+    centres, normals = _centres_and_normals(skeleton, max_points)
     if len(centres) == 0:
         return np.empty(0)
 
@@ -254,6 +264,89 @@ def fwhm_from_profile(row: np.ndarray, t: np.ndarray, min_depth: float = 10.0):
 
     w = tr - tl
     return float(w) if 0.3 <= w <= 2.0 * (t[-1]) * 0.8 else None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Photometric width + conformal interval + three-way compliance decision
+# ─────────────────────────────────────────────────────────────────────────────
+
+def photometric_assessment(gray_raw: np.ndarray, skeleton: np.ndarray, pixels_per_mm: float,
+                           limit_mm: float, max_points: int = 300) -> dict:
+    """Resolution-robust width with a 90 % distribution-free interval, from the deficit area of
+    profiles across the crack (scripts/photometric_width.py), and the decision
+    conforms / does_not_conform / inconclusive against `limit_mm`.
+
+    Calibration and conformal offsets come from docs/results/limits/photometric_calibration.json
+    (krkCMd, leave-one-series-out validated), interpolated in log(px/mm). The interval is for the
+    width at one location; it is applied at the 95th-percentile location along the crack."""
+    from scipy.ndimage import map_coordinates
+    from scripts.conformal_width import EPS_UM
+    from scripts.photometric_width import deficit_features
+
+    out = dict(available=False)
+    cal = _load_photometric_table()
+    if cal is None or pixels_per_mm <= 0:
+        out["reason"] = "calibration table not found"
+        return out
+    grid = np.array([r["px_per_mm"] for r in cal["table"]])
+    if pixels_per_mm < grid.min() * 0.95:
+        out["reason"] = f"resolution {pixels_per_mm:.2f} px/mm is below the validated range ({grid.min():g} px/mm)"
+        return out
+    centres, normals = _centres_and_normals(skeleton, max_points)
+    if len(centres) < 5:
+        out["reason"] = "too few centre-line points"
+        return out
+    pitch_um = 1000.0 / pixels_per_mm
+    R = int(np.ceil(max(800.0 / pitch_um, 6.0)))
+    k = np.arange(-R, R + 1, dtype=np.float32)
+    py = centres[:, 0:1] + normals[:, 0:1] * k[None, :]
+    px = centres[:, 1:2] + normals[:, 1:2] * k[None, :]
+    prof = map_coordinates(gray_raw, [py, px], order=1, mode="nearest")
+    P = np.array([f["P"] for f in (deficit_features(r, k, pitch_um) for r in prof) if f is not None])
+    if len(P) < 5:
+        out["reason"] = "no usable background around the crack"
+        return out
+
+    # interpolate coefficients and conformal offsets in log(px/mm), clamped to the table
+    lg = np.log(np.clip(pixels_per_mm, grid.min(), grid.max()))
+    order = np.argsort(grid)
+
+    def _interp(get):
+        return float(np.interp(lg, np.log(grid[order]), np.array([get(cal["table"][i]) for i in order])))
+
+    a = _interp(lambda r: r["photo"]["coef"][0])
+    b = _interp(lambda r: r["photo"]["coef"][1])
+    z_lo = _interp(lambda r: r["photo"]["z_lo"])
+    z_hi = _interp(lambda r: r["photo"]["z_hi"])
+
+    w_um = np.clip(a * P + b, 0.0, None)
+    w95 = float(np.percentile(w_um, 95))
+    zc = np.log(w95 + EPS_UM)
+    lo, hi = max(float(np.exp(zc + z_lo)) - EPS_UM, 0.0), float(np.exp(zc + z_hi)) - EPS_UM
+    L = limit_mm * 1000.0
+    decision = "conforms" if hi <= L else ("does_not_conform" if lo > L else "inconclusive")
+    out.update(available=True, median_mm=round(float(np.median(w_um)) / 1000, 4), p95_mm=round(w95 / 1000, 4),
+               interval90_mm=[round(lo / 1000, 4), round(hi / 1000, 4)], limit_mm=limit_mm, decision=decision,
+               n_profiles=int(len(P)),
+               basis=("photometric width (deficit area / background), calibrated on krkCMd; 90 % conformal "
+                      "interval at the 95th-percentile location; each one-sided error <= 5 % if this surface "
+                      "resembles the calibration concrete"))
+    return out
+
+
+_PHOTOMETRIC_TABLE = None
+
+
+def _load_photometric_table():
+    global _PHOTOMETRIC_TABLE
+    if _PHOTOMETRIC_TABLE is None:
+        import json
+        import os
+        p = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "docs", "results", "limits", "photometric_calibration.json")
+        if os.path.exists(p):
+            _PHOTOMETRIC_TABLE = json.load(open(p))
+    return _PHOTOMETRIC_TABLE
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -392,6 +485,23 @@ def measure_crack_width(
     design_wcr = result.p95_width_mm
     result.is_compliant = design_wcr <= result.exposure_limit_mm
     result.severity = _classify_severity(design_wcr)
+
+    # Photometric width: does not collapse when the crack is narrower than the blur
+    # (docs/RESULTS_limits.md). Uses the unsmoothed grey image.
+    gray_raw = cv2.cvtColor(original_bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    result.photometric = photometric_assessment(gray_raw, skeleton, ppm, result.exposure_limit_mm)
+    if result.photometric.get("available") and result.photometric["decision"] == "inconclusive":
+        advice = "Re-shoot closer or use a crack gauge."
+        try:
+            from scripts.capture_planner import plan
+            p = plan(result.photometric["p95_mm"], result.exposure_limit_mm, ppm, method="photo")
+            result.photometric["capture_advice"] = p
+            advice = p["advice"]
+        except (FileNotFoundError, KeyError, ValueError):
+            pass
+        result.warnings.append(
+            f"At this resolution the 90 % interval {result.photometric['interval90_mm']} mm straddles the "
+            f"{result.exposure_limit_mm} mm limit: compliance cannot be decided from this photo. {advice}")
 
     # ── 7. Overlay image ───────────────────────────────────────────────────
     result.overlay_image = _draw_overlay(

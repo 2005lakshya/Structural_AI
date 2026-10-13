@@ -941,6 +941,8 @@ async def measure_crack_width_image(
         "min_resolvable_width_mm": result.min_resolvable_width_mm,
         "warnings":                result.warnings,
         "lab_comparison":          lab_comparison,
+        # resolution-robust width, 90 % conformal interval, conforms / does_not_conform / inconclusive
+        "photometric":             result.photometric,
 
         # IS 456
         "exposure":              exposure,
@@ -1038,6 +1040,7 @@ async def measure_crack_width_ridge(
         "scale_method": result.scale_method,
         "scale_reliable": result.scale_reliable,
         "min_resolvable_width_mm": result.min_resolvable_width_mm,
+        "photometric": result.photometric,
         "gauge_comparison": comparison,
         "severity_level": result.severity.get("level", ""),
         "warnings": warnings,

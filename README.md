@@ -84,6 +84,14 @@ scripts/
   train_ml.py              Trains SHI / risk / RUL tabular models
   train.py / detect.py / predict.py   Legacy YOLOv8 pipeline
   crack_width_measure.py   Skeleton + sub-pixel intensity-profile crack width measurement
+  width_information_limit.py   Fisher information / Cramér-Rao limits of image-based crack width
+  photometric_width.py     Deficit-area (photometric) width + rectangle-transform baseline
+  conformal_width.py       Conformal intervals and certified compliance decisions
+  learned_width_estimator.py   Resolution-conditioned 1-D CNN with quantile outputs
+  evaluate_limits_krkCMd.py / evaluate_limits_2d_krkCMd.py / differential_width_krkCMd.py /
+  compare_estimators_krkCMd.py / make_limits_figures.py   krkCMd study (docs/RESULTS_limits.md)
+  element_decisions_krkCMd.py / gauge_anchoring_krkCMd.py   whole-element verdicts, gauge-anchored monitoring
+  capture_planner.py       decidability map + "how much closer to re-shoot" advice
   physics_fracture_engine.py   LEFM fracture mechanics + residual capacity engine
   grouting_controller.py   Closed-loop epoxy injection controller
   agent.py                 LangChain/Gemini structural inspection agent
@@ -233,6 +241,18 @@ The legacy YOLOv8 pipeline (superseded by CrackNet/SwinCrackNet, no longer calle
 backend) can still be trained with `python scripts/train.py`.
 
 ## Validation and limits (read before citing any number)
+
+**Information limits, photometric width and certified decisions (main research result).**
+`docs/RESULTS_limits.md`, positioning in `paper/NOVELTY.md`. A Cramér-Rao analysis
+(`scripts/width_information_limit.py`) shows that once a crack is narrower than the image blur, only its
+deficit area (width x contrast) is measurable, and edge-based width errors grow with the cube of blur/width.
+On 14,198 real krkCMd profiles (leave-one-series-out), edge-based widths fall to no-skill below ~8 px/mm
+while the photometric width (`scripts/photometric_width.py`) keeps 45-70 um MAE down to 2.5 px/mm and a
+resolution-conditioned network (`scripts/learned_width_estimator.py`) reaches 16 um at native resolution.
+`scripts/conformal_width.py` turns this into 90 % distribution-free intervals and a
+conforms / does-not-conform / inconclusive verdict against the IS 456 limit; both image endpoints return it
+as `photometric` (calibration table `docs/results/limits/photometric_calibration.json`, fitted on krkCMd:
+re-check with gauge readings on other concrete).
 
 **Width measurement.** `python scripts/validate_width_synthetic.py` renders cracks of known
 width on a noisy texture, blurs like a camera, and measures them (output:

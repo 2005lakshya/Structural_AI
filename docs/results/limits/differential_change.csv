@@ -1,0 +1,46 @@
+px_per_mm,method,label,n_pairs,mae_abs_um,mae_change_um,bias_change_um,sd_change_err_um,sign_agree_big,corr_change
+2.5,fwhm_cal,"sub-pixel FWHM, cal.",6600,112.548,67.467,44.596,86.803,0.521,0.0
+2.5,rect_cal,"rectangle transform, cal.",14910,98.173,89.314,71.113,108.594,0.631,0.085
+2.5,photo_cal,photometric (ours),14909,69.764,56.5,13.062,74.709,0.863,0.595
+2.5,fusion_cal,FWHM+photometric fusion (ours),14909,65.665,58.97,7.671,77.987,0.862,0.59
+2.5,cnn,learned (ours),14910,60.703,55.847,19.864,71.76,0.871,0.657
+3.6,fwhm_cal,"sub-pixel FWHM, cal.",8581,111.541,67.484,47.796,84.053,0.477,-0.006
+3.6,rect_cal,"rectangle transform, cal.",14909,76.143,79.005,49.244,105.378,0.72,0.296
+3.6,photo_cal,photometric (ours),14909,63.895,51.709,1.882,69.578,0.899,0.656
+3.6,fusion_cal,FWHM+photometric fusion (ours),14909,56.688,53.542,-3.447,71.414,0.9,0.658
+3.6,cnn,learned (ours),14910,52.45,50.682,11.956,68.353,0.902,0.697
+5.0,fwhm_cal,"sub-pixel FWHM, cal.",10351,109.915,68.439,48.799,83.924,0.651,0.093
+5.0,rect_cal,"rectangle transform, cal.",14909,57.622,65.256,25.499,89.062,0.805,0.49
+5.0,photo_cal,photometric (ours),14909,56.85,49.258,-10.87,65.503,0.926,0.707
+5.0,fusion_cal,FWHM+photometric fusion (ours),14909,51.525,49.816,-13.468,65.382,0.926,0.717
+5.0,cnn,learned (ours),14910,44.947,44.783,8.516,62.868,0.924,0.74
+8.0,fwhm_cal,"sub-pixel FWHM, cal.",11948,98.829,68.761,36.94,92.368,0.746,0.18
+8.0,rect_cal,"rectangle transform, cal.",14909,46.372,52.265,8.204,73.828,0.877,0.635
+8.0,photo_cal,photometric (ours),14909,52.52,46.545,-7.42,63.635,0.929,0.724
+8.0,fusion_cal,FWHM+photometric fusion (ours),14909,45.307,44.572,-7.271,61.123,0.933,0.749
+8.0,cnn,learned (ours),14910,37.039,39.321,9.612,56.191,0.943,0.784
+12.5,fwhm_cal,"sub-pixel FWHM, cal.",12832,72.276,64.035,18.148,97.102,0.804,0.311
+12.5,rect_cal,"rectangle transform, cal.",14909,44.202,47.697,6.996,68.394,0.893,0.681
+12.5,photo_cal,photometric (ours),14909,48.907,44.1,-8.101,61.069,0.937,0.746
+12.5,fusion_cal,FWHM+photometric fusion (ours),14909,46.917,43.597,-8.451,60.211,0.937,0.758
+12.5,cnn,learned (ours),14910,30.391,34.351,9.709,50.949,0.958,0.822
+25.0,fwhm_cal,"sub-pixel FWHM, cal.",13775,46.388,56.857,12.067,90.486,0.827,0.443
+25.0,rect_cal,"rectangle transform, cal.",14910,41.113,45.981,11.848,66.385,0.89,0.697
+25.0,photo_cal,photometric (ours),14909,46.435,42.179,-6.993,59.234,0.939,0.762
+25.0,fusion_cal,FWHM+photometric fusion (ours),14909,44.169,43.693,-2.86,63.413,0.926,0.723
+25.0,cnn,learned (ours),14910,22.83,28.55,8.396,45.293,0.97,0.862
+50.0,fwhm_cal,"sub-pixel FWHM, cal.",14223,39.373,51.286,10.474,83.137,0.852,0.524
+50.0,rect_cal,"rectangle transform, cal.",14909,38.699,44.799,13.651,64.272,0.892,0.715
+50.0,photo_cal,photometric (ours),14909,45.948,41.641,-5.165,59.258,0.94,0.763
+50.0,fusion_cal,FWHM+photometric fusion (ours),14909,39.185,43.994,2.289,67.912,0.907,0.683
+50.0,cnn,learned (ours),14910,18.585,24.93,8.231,41.706,0.976,0.883
+100.0,fwhm_cal,"sub-pixel FWHM, cal.",14431,37.645,47.468,7.902,77.094,0.873,0.583
+100.0,rect_cal,"rectangle transform, cal.",14909,37.56,43.871,13.844,62.996,0.896,0.726
+100.0,photo_cal,photometric (ours),14909,45.472,41.22,-4.904,58.913,0.94,0.765
+100.0,fusion_cal,FWHM+photometric fusion (ours),14909,37.671,41.859,1.098,65.395,0.916,0.705
+100.0,cnn,learned (ours),14910,16.691,23.562,9.029,40.465,0.976,0.89
+252.0,fwhm_cal,"sub-pixel FWHM, cal.",14520,36.975,45.704,6.08,74.114,0.885,0.615
+252.0,rect_cal,"rectangle transform, cal.",14909,37.026,43.489,13.835,62.46,0.899,0.73
+252.0,photo_cal,photometric (ours),14909,45.309,41.059,-4.852,58.74,0.94,0.767
+252.0,fusion_cal,FWHM+photometric fusion (ours),14909,37.099,40.791,-0.107,64.01,0.922,0.718
+252.0,cnn,learned (ours),14910,15.911,23.91,10.915,40.371,0.975,0.891

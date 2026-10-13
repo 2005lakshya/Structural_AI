@@ -1,0 +1,325 @@
+scenario,px_per_mm,method,label,n,measured_rate,mae_um,mae_ci_lo,mae_ci_hi,median_abs_um,bias_um,median_rel_pct,within_25pct,within_50pct
+blurry,25.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,48.561,44.911,52.276,38.56,-2.253,21.272,0.571,0.786
+blurry,8.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,49.188,45.433,53.186,38.902,-2.21,21.53,0.56,0.77
+blurry,3.6,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,66.402,60.911,72.425,54.498,-2.937,30.131,0.426,0.705
+blurry,25.0,fwhm,sub-pixel FWHM,14198,0.989,82.642,73.367,92.445,63.552,79.391,33.892,0.42,0.602
+blurry,8.0,fwhm,sub-pixel FWHM,14198,0.878,295.063,266.993,321.93,274.229,293.739,139.703,0.078,0.193
+blurry,3.6,fwhm,sub-pixel FWHM,14198,0.593,799.145,760.881,834.918,768.091,799.081,348.347,0.001,0.005
+blurry,25.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.989,58.014,53.95,62.67,46.615,-2.449,22.665,0.554,0.777
+blurry,8.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.878,108.134,95.907,122.354,95.124,0.576,42.551,0.286,0.579
+blurry,3.6,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.593,112.644,97.948,129.913,101.781,-1.537,40.897,0.298,0.603
+blurry,25.0,grad,gradient edges,14198,0.993,98.915,88.951,109.576,72.137,98.481,38.825,0.371,0.568
+blurry,8.0,grad,gradient edges,14198,0.94,360.756,322.381,399.041,310.135,360.729,171.859,0.038,0.137
+blurry,3.6,grad,gradient edges,14198,0.884,981.073,921.502,1043.782,855.072,981.045,483.499,0.0,0.001
+blurry,25.0,grad_cal,"gradient edges, calibrated",14198,0.993,71.882,64.328,80.667,54.402,-3.833,26.181,0.471,0.759
+blurry,8.0,grad_cal,"gradient edges, calibrated",14198,0.94,109.887,96.993,124.793,100.156,2.297,46.661,0.263,0.534
+blurry,3.6,grad_cal,"gradient edges, calibrated",14198,0.884,107.696,95.634,121.527,96.513,0.775,43.935,0.28,0.567
+blurry,25.0,photo,photometric width (ours),14198,1.0,71.701,65.626,77.982,56.534,64.948,32.051,0.42,0.639
+blurry,8.0,photo,photometric width (ours),14198,1.0,63.508,59.623,67.571,50.828,29.861,29.653,0.447,0.667
+blurry,3.6,photo,photometric width (ours),14198,1.0,69.781,64.425,75.533,55.897,-21.576,33.226,0.391,0.661
+blurry,25.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,48.432,44.806,52.175,38.488,-1.808,21.188,0.573,0.788
+blurry,8.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,57.063,52.616,61.602,46.06,-2.088,25.63,0.49,0.747
+blurry,3.6,photo_cal,"photometric width, calibrated (ours)",14198,1.0,68.489,62.725,75.105,56.739,-1.394,31.104,0.415,0.697
+blurry,25.0,photo_oracle,"photometric, contrast oracle",14198,1.0,15.51,14.066,16.808,12.244,-14.752,7.039,0.887,0.976
+blurry,8.0,photo_oracle,"photometric, contrast oracle",14198,1.0,40.875,36.591,45.18,32.793,-38.979,19.372,0.615,0.853
+blurry,3.6,photo_oracle,"photometric, contrast oracle",14198,1.0,76.753,67.199,86.557,64.022,-74.734,38.395,0.25,0.663
+blurry,25.0,rect,rectangle transform [Benz 2021],14198,1.0,55.493,49.864,61.504,41.306,48.639,24.64,0.503,0.675
+blurry,8.0,rect,rectangle transform [Benz 2021],14198,1.0,47.272,44.541,50.36,36.579,-1.875,20.918,0.563,0.799
+blurry,3.6,rect,rectangle transform [Benz 2021],14198,1.0,90.648,81.807,99.767,68.012,-24.962,38.334,0.316,0.638
+blurry,25.0,rect_cal,"rectangle transform, calibrated",14198,1.0,43.168,39.698,46.736,33.438,-1.513,18.12,0.646,0.822
+blurry,8.0,rect_cal,"rectangle transform, calibrated",14198,1.0,48.357,45.187,51.909,38.215,-1.509,20.719,0.571,0.801
+blurry,3.6,rect_cal,"rectangle transform, calibrated",14198,1.0,92.925,82.199,104.915,76.258,-0.307,38.643,0.326,0.632
+blurry,25.0,thr,threshold count,14198,0.995,85.586,76.819,95.048,68.719,83.16,36.661,0.391,0.584
+blurry,8.0,thr,threshold count,14198,0.956,310.745,282.046,337.161,281.719,309.978,151.969,0.07,0.179
+blurry,3.6,thr,threshold count,14198,0.92,930.985,889.616,971.078,837.267,930.88,467.496,0.004,0.009
+blurry,25.0,thr_cal,"threshold count, calibrated",14198,0.995,56.482,52.247,61.186,45.066,-2.265,22.41,0.56,0.789
+blurry,8.0,thr_cal,"threshold count, calibrated",14198,0.956,110.016,97.426,124.441,98.083,1.827,46.108,0.263,0.541
+blurry,3.6,thr_cal,"threshold count, calibrated",14198,0.92,111.948,99.196,127.024,102.137,1.896,46.788,0.259,0.532
+ideal_scan,252.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,37.209,33.067,41.455,27.747,-0.653,15.261,0.717,0.858
+ideal_scan,100.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,37.565,33.482,41.671,28.108,-0.637,15.413,0.714,0.856
+ideal_scan,50.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,38.39,34.415,42.411,28.916,-0.629,15.764,0.702,0.85
+ideal_scan,25.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,41.881,38.402,45.401,32.817,-1.146,17.376,0.656,0.826
+ideal_scan,12.5,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,46.605,43.327,49.953,36.77,-1.74,20.375,0.594,0.802
+ideal_scan,8.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,45.265,41.679,48.962,35.232,-1.318,19.831,0.612,0.805
+ideal_scan,5.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,46.322,42.737,50.095,35.707,-2.832,19.63,0.594,0.781
+ideal_scan,3.6,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,53.955,50.514,58.034,42.975,-2.04,23.474,0.529,0.751
+ideal_scan,2.5,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,64.532,60.159,69.972,51.875,1.558,28.096,0.452,0.714
+ideal_scan,252.0,fwhm,sub-pixel FWHM,14198,0.999,55.989,47.085,66.025,37.775,54.969,22.324,0.538,0.739
+ideal_scan,100.0,fwhm,sub-pixel FWHM,14198,0.999,56.26,47.293,66.279,38.185,55.228,22.138,0.54,0.738
+ideal_scan,50.0,fwhm,sub-pixel FWHM,14198,0.999,55.598,46.768,65.531,37.936,54.18,21.01,0.556,0.745
+ideal_scan,25.0,fwhm,sub-pixel FWHM,14198,0.997,54.956,46.801,64.242,35.866,49.123,19.738,0.572,0.744
+ideal_scan,12.5,fwhm,sub-pixel FWHM,14198,0.987,65.679,59.246,72.918,43.656,40.295,23.85,0.513,0.673
+ideal_scan,8.0,fwhm,sub-pixel FWHM,14198,0.968,95.443,85.386,105.726,64.075,47.059,36.273,0.417,0.569
+ideal_scan,5.0,fwhm,sub-pixel FWHM,14198,0.913,178.116,158.292,199.719,120.562,103.478,82.375,0.261,0.404
+ideal_scan,3.6,fwhm,sub-pixel FWHM,14198,0.829,291.612,261.497,326.271,197.999,194.369,100.0,0.16,0.272
+ideal_scan,2.5,fwhm,sub-pixel FWHM,14198,0.707,445.676,406.729,492.989,321.469,336.533,103.987,0.082,0.157
+ideal_scan,252.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,37.149,32.26,42.116,26.9,-1.613,15.236,0.767,0.878
+ideal_scan,100.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,37.541,32.715,42.469,27.282,-1.619,15.285,0.761,0.874
+ideal_scan,50.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,38.526,33.935,43.271,28.493,-1.64,15.556,0.737,0.863
+ideal_scan,25.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.997,43.227,39.202,47.551,33.078,-1.945,17.091,0.679,0.829
+ideal_scan,12.5,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.987,60.857,56.324,66.134,48.368,-3.062,23.596,0.53,0.759
+ideal_scan,8.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.968,85.223,76.649,95.23,67.042,-2.877,32.875,0.371,0.716
+ideal_scan,5.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.913,107.909,95.979,121.892,94.29,0.921,42.816,0.284,0.577
+ideal_scan,3.6,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.829,111.433,98.622,126.182,100.563,0.863,43.645,0.279,0.567
+ideal_scan,2.5,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.707,111.942,99.329,127.26,101.14,-0.505,42.448,0.287,0.586
+ideal_scan,252.0,grad,gradient edges,14198,1.0,66.835,54.374,80.74,29.979,66.258,19.365,0.568,0.728
+ideal_scan,100.0,grad,gradient edges,14198,1.0,66.785,55.522,79.381,32.269,66.446,21.286,0.549,0.723
+ideal_scan,50.0,grad,gradient edges,14198,1.0,69.55,59.726,80.686,38.6,69.235,24.101,0.513,0.702
+ideal_scan,25.0,grad,gradient edges,14198,0.999,77.191,68.742,87.009,51.627,76.781,29.054,0.453,0.651
+ideal_scan,12.5,grad,gradient edges,14198,0.992,117.267,104.085,131.626,89.117,116.953,48.549,0.321,0.508
+ideal_scan,8.0,grad,gradient edges,14198,0.981,199.371,172.652,227.251,160.832,199.163,91.242,0.189,0.339
+ideal_scan,5.0,grad,gradient edges,14198,0.95,397.67,351.105,445.636,316.009,397.633,178.864,0.037,0.136
+ideal_scan,3.6,grad,gradient edges,14198,0.932,618.7,560.541,678.247,501.775,618.7,284.229,0.002,0.028
+ideal_scan,2.5,grad,gradient edges,14198,0.928,1031.168,953.717,1112.022,820.757,1031.168,482.536,0.0,0.0
+ideal_scan,252.0,grad_cal,"gradient edges, calibrated",14198,1.0,58.042,49.477,67.315,40.074,-1.51,22.448,0.565,0.786
+ideal_scan,100.0,grad_cal,"gradient edges, calibrated",14198,1.0,54.464,46.541,63.043,36.971,-1.813,20.567,0.62,0.803
+ideal_scan,50.0,grad_cal,"gradient edges, calibrated",14198,1.0,53.34,45.841,61.737,36.233,-2.283,19.652,0.643,0.81
+ideal_scan,25.0,grad_cal,"gradient edges, calibrated",14198,0.999,54.827,48.502,61.706,39.238,-2.343,20.087,0.645,0.801
+ideal_scan,12.5,grad_cal,"gradient edges, calibrated",14198,0.992,83.477,74.307,94.053,66.14,-3.445,30.996,0.381,0.722
+ideal_scan,8.0,grad_cal,"gradient edges, calibrated",14198,0.981,110.046,96.944,124.661,95.075,1.345,44.929,0.266,0.556
+ideal_scan,5.0,grad_cal,"gradient edges, calibrated",14198,0.95,107.728,94.757,122.802,96.801,1.893,46.334,0.27,0.536
+ideal_scan,3.6,grad_cal,"gradient edges, calibrated",14198,0.932,106.27,93.803,120.569,94.228,0.957,45.06,0.275,0.552
+ideal_scan,2.5,grad_cal,"gradient edges, calibrated",14198,0.928,106.158,94.499,119.948,95.287,0.59,45.223,0.27,0.553
+ideal_scan,252.0,photo,photometric width (ours),14198,1.0,88.124,82.664,94.103,75.587,86.67,43.151,0.304,0.552
+ideal_scan,100.0,photo,photometric width (ours),14198,1.0,88.423,82.969,94.48,75.47,87.018,43.12,0.302,0.551
+ideal_scan,50.0,photo,photometric width (ours),14198,1.0,88.822,83.354,94.844,75.757,87.494,43.257,0.303,0.549
+ideal_scan,25.0,photo,photometric width (ours),14198,1.0,86.082,80.462,92.119,73.225,84.434,41.584,0.318,0.563
+ideal_scan,12.5,photo,photometric width (ours),14198,1.0,85.511,79.547,91.713,72.062,83.636,40.502,0.333,0.574
+ideal_scan,8.0,photo,photometric width (ours),14198,1.0,87.011,81.012,93.313,72.281,84.246,40.031,0.34,0.574
+ideal_scan,5.0,photo,photometric width (ours),14198,1.0,76.513,70.854,82.517,61.125,67.478,34.65,0.397,0.619
+ideal_scan,3.6,photo,photometric width (ours),14198,1.0,99.641,94.093,105.368,79.321,87.539,45.727,0.313,0.531
+ideal_scan,2.5,photo,photometric width (ours),14198,1.0,130.98,124.498,137.348,102.264,112.66,60.203,0.247,0.441
+ideal_scan,252.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.157,41.787,48.506,35.695,-1.532,19.802,0.61,0.81
+ideal_scan,100.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.271,41.949,48.569,35.898,-1.526,19.894,0.609,0.809
+ideal_scan,50.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.5,42.163,48.821,36.041,-1.528,19.932,0.605,0.808
+ideal_scan,25.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.432,42.013,48.829,36.067,-1.556,19.914,0.607,0.806
+ideal_scan,12.5,photo_cal,"photometric width, calibrated (ours)",14198,1.0,46.76,43.419,50.189,36.986,-1.576,20.402,0.597,0.801
+ideal_scan,8.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,49.115,45.701,52.95,38.764,-1.607,21.53,0.575,0.796
+ideal_scan,5.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,50.754,47.005,54.845,39.653,-1.656,21.983,0.56,0.78
+ideal_scan,3.6,photo_cal,"photometric width, calibrated (ours)",14198,1.0,61.414,56.603,67.231,49.543,-1.639,26.612,0.471,0.744
+ideal_scan,2.5,photo_cal,"photometric width, calibrated (ours)",14198,1.0,74.508,67.738,82.619,60.222,-0.943,32.44,0.388,0.699
+ideal_scan,252.0,photo_oracle,"photometric, contrast oracle",14198,1.0,1.151,1.06,1.245,0.823,-0.046,0.496,1.0,1.0
+ideal_scan,100.0,photo_oracle,"photometric, contrast oracle",14198,1.0,1.671,1.528,1.814,1.157,0.19,0.71,1.0,1.0
+ideal_scan,50.0,photo_oracle,"photometric, contrast oracle",14198,1.0,2.596,2.327,2.868,1.727,0.507,1.066,1.0,1.0
+ideal_scan,25.0,photo_oracle,"photometric, contrast oracle",14198,1.0,3.489,3.195,3.802,2.431,-1.513,1.522,0.998,1.0
+ideal_scan,12.5,photo_oracle,"photometric, contrast oracle",14198,1.0,7.37,6.728,8.003,5.166,-2.048,3.174,0.978,0.997
+ideal_scan,8.0,photo_oracle,"photometric, contrast oracle",14198,1.0,14.408,13.058,15.691,10.099,-1.317,6.205,0.912,0.981
+ideal_scan,5.0,photo_oracle,"photometric, contrast oracle",14198,1.0,21.214,19.317,22.897,15.255,-12.269,9.422,0.818,0.945
+ideal_scan,3.6,photo_oracle,"photometric, contrast oracle",14198,1.0,36.468,33.214,39.502,25.681,1.867,15.998,0.659,0.862
+ideal_scan,2.5,photo_oracle,"photometric, contrast oracle",14198,1.0,59.578,54.397,64.623,41.462,19.412,25.708,0.489,0.734
+ideal_scan,252.0,rect,rectangle transform [Benz 2021],14198,1.0,69.205,64.238,74.39,56.257,68.482,34.705,0.398,0.62
+ideal_scan,100.0,rect,rectangle transform [Benz 2021],14198,1.0,69.485,64.416,74.746,56.44,68.768,34.76,0.397,0.62
+ideal_scan,50.0,rect,rectangle transform [Benz 2021],14198,1.0,69.767,64.581,75.093,56.815,69.053,34.734,0.399,0.621
+ideal_scan,25.0,rect,rectangle transform [Benz 2021],14198,1.0,69.678,64.195,75.238,56.25,68.936,33.784,0.408,0.622
+ideal_scan,12.5,rect,rectangle transform [Benz 2021],14198,1.0,69.656,63.715,75.681,56.129,68.403,32.321,0.427,0.62
+ideal_scan,8.0,rect,rectangle transform [Benz 2021],14198,1.0,76.289,69.762,83.125,62.382,73.786,37.018,0.407,0.577
+ideal_scan,5.0,rect,rectangle transform [Benz 2021],14198,1.0,104.433,96.863,112.422,86.122,100.597,52.089,0.311,0.488
+ideal_scan,3.6,rect,rectangle transform [Benz 2021],14198,1.0,144.707,136.199,154.968,111.323,140.104,66.434,0.244,0.42
+ideal_scan,2.5,rect,rectangle transform [Benz 2021],14198,1.0,200.381,186.25,216.349,136.709,194.848,81.289,0.205,0.369
+ideal_scan,252.0,rect_cal,"rectangle transform, calibrated",14198,1.0,37.329,34.568,40.219,29.22,-1.541,15.347,0.704,0.848
+ideal_scan,100.0,rect_cal,"rectangle transform, calibrated",14198,1.0,37.617,34.865,40.498,29.51,-1.583,15.488,0.701,0.848
+ideal_scan,50.0,rect_cal,"rectangle transform, calibrated",14198,1.0,38.053,35.339,40.924,30.033,-1.599,15.614,0.698,0.847
+ideal_scan,25.0,rect_cal,"rectangle transform, calibrated",14198,1.0,39.345,36.704,42.251,30.973,-1.638,16.155,0.687,0.843
+ideal_scan,12.5,rect_cal,"rectangle transform, calibrated",14198,1.0,42.836,40.12,45.685,34.149,-1.687,17.69,0.655,0.824
+ideal_scan,8.0,rect_cal,"rectangle transform, calibrated",14198,1.0,49.208,45.828,52.843,39.763,-1.668,20.429,0.596,0.8
+ideal_scan,5.0,rect_cal,"rectangle transform, calibrated",14198,1.0,66.497,60.144,73.333,51.571,-1.726,27.396,0.452,0.754
+ideal_scan,3.6,rect_cal,"rectangle transform, calibrated",14198,1.0,85.916,75.927,96.972,66.57,-0.479,35.175,0.36,0.672
+ideal_scan,2.5,rect_cal,"rectangle transform, calibrated",14198,1.0,101.883,89.867,115.034,86.227,1.449,43.529,0.288,0.571
+ideal_scan,252.0,thr,threshold count,14198,1.0,55.717,46.751,65.568,35.71,54.389,22.207,0.543,0.746
+ideal_scan,100.0,thr,threshold count,14198,1.0,56.346,47.477,66.175,38.219,55.174,22.385,0.526,0.737
+ideal_scan,50.0,thr,threshold count,14198,1.0,57.177,48.235,66.864,39.312,55.919,22.911,0.521,0.731
+ideal_scan,25.0,thr,threshold count,14198,1.0,60.138,51.791,69.514,44.281,58.083,24.569,0.502,0.713
+ideal_scan,12.5,thr,threshold count,14198,0.998,70.099,62.619,78.596,53.469,64.331,28.665,0.454,0.673
+ideal_scan,8.0,thr,threshold count,14198,0.996,90.502,83.735,97.752,71.375,80.146,36.939,0.376,0.601
+ideal_scan,5.0,thr,threshold count,14198,0.986,149.579,136.407,164.699,113.531,134.187,57.48,0.275,0.459
+ideal_scan,3.6,thr,threshold count,14198,0.981,251.524,223.039,280.705,174.59,236.476,99.975,0.194,0.335
+ideal_scan,2.5,thr,threshold count,14198,0.98,493.445,428.068,559.475,292.844,487.641,179.965,0.116,0.191
+ideal_scan,252.0,thr_cal,"threshold count, calibrated",14198,1.0,37.231,32.119,42.255,26.405,-1.585,15.143,0.774,0.877
+ideal_scan,100.0,thr_cal,"threshold count, calibrated",14198,1.0,37.686,32.617,42.818,26.948,-1.6,15.294,0.771,0.876
+ideal_scan,50.0,thr_cal,"threshold count, calibrated",14198,1.0,38.498,33.493,43.603,27.706,-1.622,15.489,0.754,0.869
+ideal_scan,25.0,thr_cal,"threshold count, calibrated",14198,1.0,40.475,35.737,45.402,29.186,-1.658,16.223,0.711,0.854
+ideal_scan,12.5,thr_cal,"threshold count, calibrated",14198,0.998,48.83,44.859,53.235,37.239,-1.681,19.894,0.596,0.808
+ideal_scan,8.0,thr_cal,"threshold count, calibrated",14198,0.996,64.981,60.397,70.601,51.793,-2.345,26.783,0.464,0.754
+ideal_scan,5.0,thr_cal,"threshold count, calibrated",14198,0.986,101.23,90.377,113.75,86.011,-0.77,41.364,0.287,0.607
+ideal_scan,3.6,thr_cal,"threshold count, calibrated",14198,0.981,112.006,98.75,126.833,102.337,2.678,48.588,0.251,0.515
+ideal_scan,2.5,thr_cal,"threshold count, calibrated",14198,0.98,106.635,94.088,121.249,95.515,1.72,46.978,0.26,0.529
+noisy,25.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,44.747,41.222,48.362,34.967,-1.536,18.936,0.621,0.816
+noisy,8.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,47.915,44.09,52.038,37.037,-1.97,20.952,0.578,0.787
+noisy,3.6,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,61.898,57.657,66.823,50.416,-2.532,27.833,0.457,0.717
+noisy,25.0,fwhm,sub-pixel FWHM,14198,0.996,61.495,53.488,70.565,42.661,56.433,23.171,0.522,0.704
+noisy,8.0,fwhm,sub-pixel FWHM,14198,0.947,142.736,125.55,160.23,105.714,123.147,58.024,0.302,0.462
+noisy,3.6,fwhm,sub-pixel FWHM,14198,0.78,444.45,409.54,483.889,377.373,425.107,169.342,0.063,0.142
+noisy,25.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.996,46.707,42.833,50.867,36.42,-1.804,18.487,0.648,0.815
+noisy,8.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.947,98.271,87.49,110.542,81.523,-1.225,38.394,0.316,0.643
+noisy,3.6,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.78,112.191,99.305,127.117,102.574,0.222,43.304,0.279,0.573
+noisy,25.0,grad,gradient edges,14198,0.997,86.013,77.487,95.464,57.709,85.601,31.842,0.424,0.623
+noisy,8.0,grad,gradient edges,14198,0.969,251.323,218.919,285.037,198.183,251.096,112.325,0.135,0.281
+noisy,3.6,grad,gradient edges,14198,0.92,760.932,695.854,828.748,607.008,760.932,349.187,0.001,0.008
+noisy,25.0,grad_cal,"gradient edges, calibrated",14198,0.997,62.816,55.863,70.896,45.246,-3.13,22.84,0.556,0.782
+noisy,8.0,grad_cal,"gradient edges, calibrated",14198,0.969,112.037,98.989,126.776,100.902,2.6,47.36,0.253,0.527
+noisy,3.6,grad_cal,"gradient edges, calibrated",14198,0.92,105.687,93.837,119.46,93.525,0.661,44.378,0.279,0.56
+noisy,25.0,photo,photometric width (ours),14198,1.0,81.465,75.641,88.017,68.747,78.565,38.74,0.357,0.582
+noisy,8.0,photo,photometric width (ours),14198,1.0,78.223,72.628,84.261,61.093,65.964,35.209,0.387,0.614
+noisy,3.6,photo,photometric width (ours),14198,1.0,89.01,84.804,93.574,70.73,53.623,42.609,0.336,0.558
+noisy,25.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,47.549,43.911,51.236,37.56,-1.698,20.941,0.582,0.798
+noisy,8.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,54.303,50.41,58.489,43.066,-1.969,23.935,0.52,0.76
+noisy,3.6,photo_cal,"photometric width, calibrated (ours)",14198,1.0,67.232,61.909,73.674,54.67,-1.625,30.139,0.419,0.712
+noisy,25.0,photo_oracle,"photometric, contrast oracle",14198,1.0,9.86,8.991,10.73,7.455,-5.759,4.566,0.97,0.997
+noisy,8.0,photo_oracle,"photometric, contrast oracle",14198,1.0,24.669,22.78,26.47,19.027,-13.942,11.468,0.771,0.93
+noisy,3.6,photo_oracle,"photometric, contrast oracle",14198,1.0,46.33,42.596,49.918,35.381,-22.166,21.956,0.546,0.79
+noisy,25.0,rect,rectangle transform [Benz 2021],14198,1.0,64.028,58.048,70.154,51.726,61.754,30.368,0.449,0.631
+noisy,8.0,rect,rectangle transform [Benz 2021],14198,1.0,62.894,57.786,68.453,49.192,52.945,27.827,0.471,0.656
+noisy,3.6,rect,rectangle transform [Benz 2021],14198,1.0,101.143,94.473,108.372,75.914,85.243,39.977,0.364,0.56
+noisy,25.0,rect_cal,"rectangle transform, calibrated",14198,1.0,41.176,38.644,43.902,32.805,-1.5,17.047,0.663,0.834
+noisy,8.0,rect_cal,"rectangle transform, calibrated",14198,1.0,48.536,44.63,52.939,37.401,-1.686,20.632,0.584,0.801
+noisy,3.6,rect_cal,"rectangle transform, calibrated",14198,1.0,78.204,70.579,86.905,61.657,-1.243,32.192,0.388,0.702
+noisy,25.0,thr,threshold count,14198,0.999,64.411,56.589,73.233,48.875,61.581,25.984,0.476,0.68
+noisy,8.0,thr,threshold count,14198,0.986,139.583,126.912,152.961,113.109,132.416,61.518,0.27,0.453
+noisy,3.6,thr,threshold count,14198,0.962,447.903,410.673,487.828,372.993,444.587,204.31,0.068,0.139
+noisy,25.0,thr_cal,"threshold count, calibrated",14198,0.999,43.377,39.453,47.594,33.093,-1.519,17.484,0.663,0.836
+noisy,8.0,thr_cal,"threshold count, calibrated",14198,0.986,88.305,80.19,98.164,72.642,-2.386,35.525,0.341,0.683
+noisy,3.6,thr_cal,"threshold count, calibrated",14198,0.962,111.21,98.079,125.888,102.37,2.376,47.638,0.257,0.524
+phone_like,252.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,37.099,32.95,41.328,27.671,-0.69,15.244,0.719,0.859
+phone_like,100.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,37.671,33.567,41.765,28.2,-0.713,15.406,0.712,0.857
+phone_like,50.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,39.185,35.353,43.028,29.716,-0.721,16.083,0.691,0.847
+phone_like,25.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,44.169,40.761,47.607,34.587,-1.431,18.428,0.627,0.815
+phone_like,12.5,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,46.917,43.134,50.931,36.088,-2.049,20.868,0.579,0.806
+phone_like,8.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,45.307,41.577,49.358,34.884,-1.637,19.71,0.602,0.797
+phone_like,5.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,51.525,47.557,55.744,40.341,-3.543,22.873,0.536,0.758
+phone_like,3.6,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,56.688,52.927,61.025,44.938,-2.101,24.891,0.502,0.74
+phone_like,2.5,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,65.665,61.47,70.758,53.972,1.083,28.793,0.443,0.706
+phone_like,252.0,fwhm,sub-pixel FWHM,14198,0.999,55.938,47.087,65.861,37.853,54.859,22.37,0.536,0.738
+phone_like,100.0,fwhm,sub-pixel FWHM,14198,0.999,56.637,47.741,66.644,38.901,55.629,22.489,0.535,0.736
+phone_like,50.0,fwhm,sub-pixel FWHM,14198,0.999,57.128,48.518,66.99,39.819,55.645,21.894,0.541,0.732
+phone_like,25.0,fwhm,sub-pixel FWHM,14198,0.995,60.875,52.713,70.102,41.851,56.06,22.654,0.528,0.709
+phone_like,12.5,fwhm,sub-pixel FWHM,14198,0.979,86.079,76.137,96.417,61.283,72.78,32.231,0.439,0.603
+phone_like,8.0,fwhm,sub-pixel FWHM,14198,0.946,141.801,124.161,159.525,103.763,123.611,57.593,0.306,0.468
+phone_like,5.0,fwhm,sub-pixel FWHM,14198,0.861,272.197,244.763,301.303,220.611,251.817,101.59,0.14,0.271
+phone_like,3.6,fwhm,sub-pixel FWHM,14198,0.755,424.087,389.863,461.102,371.439,408.599,167.225,0.056,0.138
+phone_like,2.5,fwhm,sub-pixel FWHM,14198,0.631,696.321,652.791,737.6,633.819,691.249,278.916,0.012,0.032
+phone_like,252.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,36.975,32.155,41.859,26.766,-1.573,15.106,0.769,0.878
+phone_like,100.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,37.645,32.878,42.472,27.476,-1.636,15.302,0.756,0.874
+phone_like,50.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.999,39.373,35.014,43.941,29.289,-1.598,15.873,0.725,0.858
+phone_like,25.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.995,46.388,42.503,50.518,36.125,-1.818,18.363,0.65,0.815
+phone_like,12.5,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.979,72.276,66.098,79.18,58.7,-3.52,28.035,0.442,0.732
+phone_like,8.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.946,98.829,87.839,111.31,81.384,-1.254,38.2,0.319,0.639
+phone_like,5.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.861,109.915,97.457,124.315,97.88,0.87,43.137,0.28,0.572
+phone_like,3.6,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.755,111.541,98.741,126.172,101.323,-0.086,42.48,0.286,0.585
+phone_like,2.5,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.631,112.548,98.345,129.229,102.117,-1.445,41.228,0.296,0.603
+phone_like,252.0,grad,gradient edges,14198,1.0,69.684,57.149,83.531,31.151,69.146,19.709,0.562,0.724
+phone_like,100.0,grad,gradient edges,14198,1.0,68.716,57.676,80.788,33.749,68.262,21.93,0.536,0.716
+phone_like,50.0,grad,gradient edges,14198,1.0,71.091,61.722,81.734,40.809,70.633,24.935,0.501,0.694
+phone_like,25.0,grad,gradient edges,14198,0.997,81.861,73.72,91.397,56.268,81.532,30.519,0.436,0.629
+phone_like,12.5,grad,gradient edges,14198,0.987,135.027,119.114,152.413,105.616,134.749,58.29,0.281,0.458
+phone_like,8.0,grad,gradient edges,14198,0.969,239.099,209.099,269.261,196.129,238.956,110.366,0.138,0.283
+phone_like,5.0,grad,gradient edges,14198,0.933,455.207,408.708,502.963,383.097,455.202,212.393,0.014,0.082
+phone_like,3.6,grad,gradient edges,14198,0.917,707.381,650.77,765.006,599.71,707.381,331.173,0.0,0.007
+phone_like,2.5,grad,gradient edges,14198,0.906,1147.543,1074.391,1227.979,948.342,1147.543,540.138,0.0,0.0
+phone_like,252.0,grad_cal,"gradient edges, calibrated",14198,1.0,60.909,52.241,70.705,42.786,-1.558,23.738,0.53,0.773
+phone_like,100.0,grad_cal,"gradient edges, calibrated",14198,1.0,55.774,47.888,64.517,38.093,-1.943,21.118,0.601,0.799
+phone_like,50.0,grad_cal,"gradient edges, calibrated",14198,1.0,53.601,46.3,61.699,36.753,-2.231,19.653,0.644,0.807
+phone_like,25.0,grad_cal,"gradient edges, calibrated",14198,0.997,58.798,52.415,65.959,42.714,-3.046,21.366,0.6,0.792
+phone_like,12.5,grad_cal,"gradient edges, calibrated",14198,0.987,91.548,81.249,103.112,73.367,-2.765,34.16,0.341,0.683
+phone_like,8.0,grad_cal,"gradient edges, calibrated",14198,0.969,111.714,98.562,126.309,99.956,2.123,46.735,0.255,0.534
+phone_like,5.0,grad_cal,"gradient edges, calibrated",14198,0.933,107.132,94.286,121.938,95.986,1.595,45.551,0.275,0.546
+phone_like,3.6,grad_cal,"gradient edges, calibrated",14198,0.917,106.004,93.697,120.055,94.341,0.759,44.437,0.279,0.56
+phone_like,2.5,grad_cal,"gradient edges, calibrated",14198,0.906,105.926,94.585,119.323,94.637,0.262,44.023,0.278,0.567
+phone_like,252.0,photo,photometric width (ours),14198,1.0,87.658,82.191,93.609,75.034,86.151,42.88,0.307,0.552
+phone_like,100.0,photo,photometric width (ours),14198,1.0,87.381,81.893,93.379,74.691,85.904,42.484,0.31,0.554
+phone_like,50.0,photo,photometric width (ours),14198,1.0,86.309,80.643,92.543,73.466,84.779,41.542,0.32,0.562
+phone_like,25.0,photo,photometric width (ours),14198,1.0,80.158,74.288,86.482,66.649,77.574,37.597,0.364,0.596
+phone_like,12.5,photo,photometric width (ours),14198,1.0,74.56,68.777,80.755,58.958,68.345,33.209,0.408,0.631
+phone_like,8.0,photo,photometric width (ours),14198,1.0,74.142,68.72,80.004,57.531,61.782,32.857,0.41,0.639
+phone_like,5.0,photo,photometric width (ours),14198,1.0,65.523,61.324,69.844,51.631,35.231,30.343,0.438,0.659
+phone_like,3.6,photo,photometric width (ours),14198,1.0,82.452,78.036,87.049,65.307,48.274,39.148,0.36,0.581
+phone_like,2.5,photo,photometric width (ours),14198,1.0,95.501,91.076,100.054,77.284,59.835,45.399,0.314,0.534
+phone_like,252.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.309,41.94,48.696,35.764,-1.548,19.849,0.607,0.809
+phone_like,100.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.472,42.071,48.826,35.861,-1.539,19.904,0.607,0.808
+phone_like,50.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,45.948,42.55,49.309,36.048,-1.563,20.197,0.599,0.806
+phone_like,25.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,46.435,42.919,49.952,36.331,-1.649,20.278,0.598,0.801
+phone_like,12.5,photo_cal,"photometric width, calibrated (ours)",14198,1.0,48.907,45.481,52.563,38.573,-1.78,21.373,0.568,0.787
+phone_like,8.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,52.52,48.861,56.51,41.833,-1.888,23.103,0.534,0.769
+phone_like,5.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,56.85,52.276,61.694,45.535,-2.004,25.226,0.497,0.749
+phone_like,3.6,photo_cal,"photometric width, calibrated (ours)",14198,1.0,63.895,58.801,69.799,51.571,-1.727,28.524,0.444,0.727
+phone_like,2.5,photo_cal,"photometric width, calibrated (ours)",14198,1.0,69.764,64.056,76.581,57.239,-1.402,31.05,0.409,0.697
+phone_like,252.0,photo_oracle,"photometric, contrast oracle",14198,1.0,1.825,1.66,1.997,1.321,-0.468,0.814,1.0,1.0
+phone_like,100.0,photo_oracle,"photometric, contrast oracle",14198,1.0,2.502,2.3,2.713,1.823,-0.635,1.119,0.999,1.0
+phone_like,50.0,photo_oracle,"photometric, contrast oracle",14198,1.0,3.877,3.541,4.203,2.854,-1.385,1.77,0.998,1.0
+phone_like,25.0,photo_oracle,"photometric, contrast oracle",14198,1.0,7.542,6.84,8.213,5.804,-6.178,3.449,0.98,0.997
+phone_like,12.5,photo_oracle,"photometric, contrast oracle",14198,1.0,14.953,13.594,16.142,11.594,-12.376,6.854,0.888,0.977
+phone_like,8.0,photo_oracle,"photometric, contrast oracle",14198,1.0,23.023,21.103,24.868,17.917,-16.728,10.618,0.782,0.934
+phone_like,5.0,photo_oracle,"photometric, contrast oracle",14198,1.0,38.621,34.807,42.346,30.702,-34.864,18.491,0.63,0.858
+phone_like,3.6,photo_oracle,"photometric, contrast oracle",14198,1.0,43.127,39.441,46.574,32.784,-25.689,20.452,0.573,0.803
+phone_like,2.5,photo_oracle,"photometric, contrast oracle",14198,1.0,48.366,44.383,52.072,35.953,-18.022,22.437,0.536,0.781
+phone_like,252.0,rect,rectangle transform [Benz 2021],14198,1.0,67.955,63.072,72.924,55.529,67.165,34.302,0.402,0.624
+phone_like,100.0,rect,rectangle transform [Benz 2021],14198,1.0,67.583,62.508,72.749,54.845,66.781,33.448,0.408,0.627
+phone_like,50.0,rect,rectangle transform [Benz 2021],14198,1.0,66.125,60.683,71.615,53.286,65.247,31.746,0.427,0.637
+phone_like,25.0,rect,rectangle transform [Benz 2021],14198,1.0,62.795,56.777,69.071,49.478,61.138,29.129,0.458,0.644
+phone_like,12.5,rect,rectangle transform [Benz 2021],14198,1.0,58.845,53.106,65.173,44.544,52.854,27.054,0.481,0.659
+phone_like,8.0,rect,rectangle transform [Benz 2021],14198,1.0,57.974,52.798,63.617,43.836,48.647,24.619,0.505,0.69
+phone_like,5.0,rect,rectangle transform [Benz 2021],14198,1.0,69.938,65.503,74.839,51.925,56.08,27.883,0.469,0.663
+phone_like,3.6,rect,rectangle transform [Benz 2021],14198,1.0,86.293,80.474,92.535,59.8,62.579,31.729,0.427,0.637
+phone_like,2.5,rect,rectangle transform [Benz 2021],14198,1.0,105.821,97.35,115.851,67.273,68.497,34.382,0.393,0.615
+phone_like,252.0,rect_cal,"rectangle transform, calibrated",14198,1.0,37.026,34.325,39.908,28.888,-1.458,15.184,0.702,0.85
+phone_like,100.0,rect_cal,"rectangle transform, calibrated",14198,1.0,37.56,34.874,40.468,29.493,-1.526,15.511,0.7,0.848
+phone_like,50.0,rect_cal,"rectangle transform, calibrated",14198,1.0,38.699,36.032,41.545,30.692,-1.541,15.877,0.691,0.845
+phone_like,25.0,rect_cal,"rectangle transform, calibrated",14198,1.0,41.113,38.319,44.065,32.603,-1.58,16.951,0.67,0.833
+phone_like,12.5,rect_cal,"rectangle transform, calibrated",14198,1.0,44.202,40.645,47.903,33.901,-1.547,18.578,0.642,0.819
+phone_like,8.0,rect_cal,"rectangle transform, calibrated",14198,1.0,46.372,42.389,50.951,35.701,-1.605,19.563,0.61,0.812
+phone_like,5.0,rect_cal,"rectangle transform, calibrated",14198,1.0,57.622,52.875,62.944,44.982,-1.671,24.056,0.518,0.774
+phone_like,3.6,rect_cal,"rectangle transform, calibrated",14198,1.0,76.143,68.303,84.99,59.169,-1.616,30.826,0.404,0.722
+phone_like,2.5,rect_cal,"rectangle transform, calibrated",14198,1.0,98.173,86.314,111.205,81.901,0.542,40.203,0.31,0.607
+phone_like,252.0,thr,threshold count,14198,1.0,54.96,46.291,64.547,35.708,53.588,22.207,0.544,0.747
+phone_like,100.0,thr,threshold count,14198,1.0,56.426,47.609,66.181,38.719,55.189,22.579,0.524,0.734
+phone_like,50.0,thr,threshold count,14198,1.0,58.606,49.886,68.184,41.406,57.333,23.694,0.51,0.72
+phone_like,25.0,thr,threshold count,14198,0.999,65.398,57.147,74.542,49.188,63.089,25.984,0.476,0.678
+phone_like,12.5,thr,threshold count,14198,0.994,91.487,82.854,100.668,73.312,86.866,39.017,0.377,0.571
+phone_like,8.0,thr,threshold count,14198,0.986,141.757,128.114,155.628,115.062,136.262,61.518,0.26,0.45
+phone_like,5.0,thr,threshold count,14198,0.961,280.433,250.404,311.696,229.344,276.367,119.103,0.136,0.262
+phone_like,3.6,thr,threshold count,14198,0.956,483.879,433.982,538.096,384.899,481.67,204.31,0.063,0.134
+phone_like,2.5,thr,threshold count,14198,0.949,886.823,804.227,976.017,641.25,886.011,379.94,0.02,0.042
+phone_like,252.0,thr_cal,"threshold count, calibrated",14198,1.0,36.438,31.527,41.394,25.957,-1.595,14.776,0.776,0.88
+phone_like,100.0,thr_cal,"threshold count, calibrated",14198,1.0,37.352,32.385,42.408,26.93,-1.584,15.06,0.767,0.875
+phone_like,50.0,thr_cal,"threshold count, calibrated",14198,1.0,38.827,34.066,43.703,28.35,-1.557,15.476,0.743,0.866
+phone_like,25.0,thr_cal,"threshold count, calibrated",14198,0.999,44.124,40.105,48.561,33.992,-1.633,17.443,0.669,0.834
+phone_like,12.5,thr_cal,"threshold count, calibrated",14198,0.994,62.324,57.793,67.641,50.269,-2.398,24.836,0.502,0.767
+phone_like,8.0,thr_cal,"threshold count, calibrated",14198,0.986,89.333,79.947,99.965,71.159,-2.271,35.295,0.354,0.683
+phone_like,5.0,thr_cal,"threshold count, calibrated",14198,0.961,111.744,98.804,126.386,101.671,2.455,46.97,0.257,0.53
+phone_like,3.6,thr_cal,"threshold count, calibrated",14198,0.956,108.28,95.663,122.975,97.65,1.646,46.986,0.267,0.533
+phone_like,2.5,thr_cal,"threshold count, calibrated",14198,0.949,106.904,95.196,121.157,95.531,0.656,46.364,0.266,0.538
+shading,25.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,44.454,40.976,48.001,34.941,-1.493,18.664,0.625,0.815
+shading,8.0,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,45.458,41.872,49.301,35.108,-1.205,19.875,0.601,0.796
+shading,3.6,fusion_cal,FWHM+photometric fusion (ours),14198,1.0,57.686,54.149,61.687,46.367,-0.305,24.986,0.5,0.732
+shading,25.0,fwhm,sub-pixel FWHM,14198,0.995,61.402,53.332,70.64,42.311,56.553,22.884,0.526,0.706
+shading,8.0,fwhm,sub-pixel FWHM,14198,0.931,141.686,124.996,158.604,105.638,123.488,57.258,0.305,0.465
+shading,3.6,fwhm,sub-pixel FWHM,14198,0.669,440.909,405.911,481.487,382.932,425.991,165.518,0.057,0.137
+shading,25.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.995,46.746,42.791,50.924,36.48,-1.867,18.433,0.649,0.816
+shading,8.0,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.931,97.897,87.128,110.101,81.727,-1.312,37.545,0.327,0.651
+shading,3.6,fwhm_cal,"sub-pixel FWHM, calibrated",14198,0.669,112.486,99.831,127.686,101.884,-0.714,41.298,0.298,0.602
+shading,25.0,grad,gradient edges,14198,0.998,82.645,74.596,91.967,56.238,82.147,30.914,0.433,0.631
+shading,8.0,grad,gradient edges,14198,0.97,244.119,213.726,275.374,196.957,243.986,111.263,0.136,0.285
+shading,3.6,grad,gradient edges,14198,0.937,768.288,701.933,837.02,615.358,768.288,357.922,0.0,0.007
+shading,25.0,grad_cal,"gradient edges, calibrated",14198,0.998,59.53,53.22,66.839,43.5,-3.031,21.619,0.594,0.789
+shading,8.0,grad_cal,"gradient edges, calibrated",14198,0.97,111.968,98.809,126.755,100.351,2.354,47.273,0.253,0.53
+shading,3.6,grad_cal,"gradient edges, calibrated",14198,0.937,105.155,93.537,118.855,93.129,0.473,44.825,0.276,0.554
+shading,25.0,photo,photometric width (ours),14198,1.0,80.852,74.953,87.298,67.631,78.127,38.242,0.36,0.591
+shading,8.0,photo,photometric width (ours),14198,1.0,75.717,70.323,81.407,59.865,63.85,34.073,0.399,0.624
+shading,3.6,photo,photometric width (ours),14198,1.0,84.551,80.317,89.015,68.733,52.11,40.569,0.351,0.571
+shading,25.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,46.824,43.21,50.469,37.316,-1.66,20.401,0.591,0.798
+shading,8.0,photo_cal,"photometric width, calibrated (ours)",14198,1.0,52.66,49.064,56.535,42.312,-1.91,23.139,0.535,0.765
+shading,3.6,photo_cal,"photometric width, calibrated (ours)",14198,1.0,64.095,58.905,69.873,52.449,-1.764,28.557,0.446,0.723
+shading,25.0,photo_oracle,"photometric, contrast oracle",14198,1.0,9.068,8.298,9.807,6.892,-5.823,4.176,0.968,0.996
+shading,8.0,photo_oracle,"photometric, contrast oracle",14198,1.0,22.533,20.663,24.248,17.022,-15.391,10.293,0.79,0.935
+shading,3.6,photo_oracle,"photometric, contrast oracle",14198,1.0,41.895,38.217,45.309,31.436,-23.147,19.37,0.587,0.812
+shading,25.0,rect,rectangle transform [Benz 2021],14198,1.0,66.366,60.409,72.547,52.956,64.263,30.614,0.445,0.628
+shading,8.0,rect,rectangle transform [Benz 2021],14198,1.0,61.185,56.32,66.895,46.097,51.68,25.899,0.49,0.671
+shading,3.6,rect,rectangle transform [Benz 2021],14198,1.0,96.925,90.397,103.826,64.934,71.891,33.808,0.41,0.607
+shading,25.0,rect_cal,"rectangle transform, calibrated",14198,1.0,43.173,40.368,46.05,34.501,-1.589,17.954,0.647,0.823
+shading,8.0,rect_cal,"rectangle transform, calibrated",14198,1.0,48.698,44.925,52.972,37.791,-1.77,20.572,0.586,0.8
+shading,3.6,rect_cal,"rectangle transform, calibrated",14198,1.0,85.179,76.071,95.439,67.21,-0.78,34.198,0.362,0.686
+shading,25.0,thr,threshold count,14198,0.999,66.071,57.945,75.178,49.5,63.757,25.984,0.471,0.678
+shading,8.0,thr,threshold count,14198,0.986,145.985,130.956,160.324,117.031,140.242,61.518,0.264,0.451
+shading,3.6,thr,threshold count,14198,0.966,551.454,491.92,613.187,404.743,549.309,225.541,0.057,0.126
+shading,25.0,thr_cal,"threshold count, calibrated",14198,0.999,44.376,40.266,48.915,33.651,-1.683,17.74,0.668,0.834
+shading,8.0,thr_cal,"threshold count, calibrated",14198,0.986,93.344,83.542,104.824,75.066,-2.024,36.948,0.325,0.663
+shading,3.6,thr_cal,"threshold count, calibrated",14198,0.966,107.011,94.811,121.57,96.022,1.38,46.631,0.27,0.533

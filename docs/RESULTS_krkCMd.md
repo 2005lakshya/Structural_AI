@@ -1,5 +1,9 @@
 # Real-data resolution study (krkCMd)
 
+> Follow-up: `docs/RESULTS_limits.md` explains these results with a Cramér-Rao analysis, adds deficit-based,
+> fused and learned estimators that do not collapse below ~8 px/mm, conformal intervals with compliance
+> decisions, and self-healing monitoring. The +55 um offset below is traced there to a ~100 um dark rim.
+
 **Data.** krkCMd, Zenodo [10.5281/zenodo.14568863](https://doi.org/10.5281/zenodo.14568863)
 (CC BY 4.0; Scientific Data 2025, [10.1038/s41597-025-04485-z](https://doi.org/10.1038/s41597-025-04485-z)).
 19,098 brightness profiles across real concrete cracks (scanner pixel pitch 3.97 µm, ~252 px/mm),

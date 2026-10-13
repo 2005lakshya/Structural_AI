@@ -391,6 +391,19 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
                 <strong>{widthResult.lab_comparison.abs_error_mm} mm ({widthResult.lab_comparison.rel_error_pct}%)</strong>
               </div>
             )}
+            {widthResult.photometric?.available && (
+              <div className={`banner ${widthResult.photometric.decision === 'inconclusive' ? 'error' : 'info'}`}
+                style={{ marginBottom: 16 }}>
+                <span>
+                  <strong>Resolution-robust check (photometric width):</strong>{' '}
+                  p95 width {widthResult.photometric.p95_mm} mm, 90% interval{' '}
+                  [{widthResult.photometric.interval90_mm[0]}, {widthResult.photometric.interval90_mm[1]}] mm vs limit{' '}
+                  {widthResult.photometric.limit_mm} mm →{' '}
+                  <strong>{{ conforms: 'CONFORMS', does_not_conform: 'DOES NOT CONFORM',
+                             inconclusive: 'INCONCLUSIVE (re-shoot closer or use a gauge)' }[widthResult.photometric.decision]}</strong>
+                </span>
+              </div>
+            )}
 
             {/* Severity Verdict Banner */}
             <div style={{
