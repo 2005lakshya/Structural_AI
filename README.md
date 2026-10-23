@@ -191,6 +191,7 @@ scripts/  — crack-width research study (docs/RESULTS_limits.md)
   capture_planner.py            decidability map, "how much closer to re-shoot"
   certified_width.py            app: all five certified stages (w_c, estimators, intervals, decisions, anchoring)
   export_app_calibration.py     app calibration tables (w_c look-up, CNN, anchoring, element maximum)
+  make_demo_image.py            test photo (real krkCMd crack or synthetic) for trying the app
   evaluate_limits_2d_krkCMd.py  2-D end-to-end check on held-out image bands
   make_limits_figures.py        paper figures
   fetch_krkCMd_band.py          downloads one image band from the 38.6 GB Zenodo zip by range requests
@@ -206,6 +207,78 @@ data/                      datasets (see above);  outputs/  regenerated study ou
 ```
 
 ## Setup
+
+### Quick start on a new laptop (copy-paste)
+
+Needs Python 3.11 or 3.12, Node.js 18+, Git and [Git LFS](https://git-lfs.com) (install Git LFS
+**before** cloning, otherwise the model weights arrive as small text pointers). About 3 GB of disk
+with PyTorch; the clone itself is ~340 MB.
+
+**Windows (PowerShell)**
+
+```powershell
+git lfs install
+git clone https://github.com/2005lakshya/Structural_AI.git
+cd Structural_AI
+git lfs ls-files                      # must list 15 weight files under models/
+py -3.11 -m venv .venv
+.venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+python -m pip install --upgrade pip
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
+copy .env.example .env                # optional: Gemini key for the AI report / chat
+cd frontend-react; npm ci; cd ..
+```
+
+**macOS / Linux**
+
+```bash
+git lfs install
+git clone https://github.com/2005lakshya/Structural_AI.git
+cd Structural_AI
+git lfs ls-files                      # must list 15 weight files under models/
+python3.11 -m venv .venv && source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
+cp .env.example .env                  # optional
+(cd frontend-react && npm ci)
+```
+
+(With an NVIDIA GPU use the CUDA wheel instead of `/whl/cpu`, e.g. `/whl/cu121`; the app itself runs
+fine on CPU.)
+
+**Check the install, then run** (two terminals, venv active in the first):
+
+```bash
+python -m pytest tests -q             # 26 tests, about 1-2 min, all must pass
+python main.py                        # backend on http://127.0.0.1:8000  (GET /health -> {"status":"ok"})
+cd frontend-react && npm start        # frontend on http://localhost:3000
+```
+
+If port 8000 is taken: start the backend with `STRUCTURALAI_PORT=8010` (PowerShell:
+`$env:STRUCTURALAI_PORT=8010; python main.py`) and the frontend with
+`REACT_APP_API_URL=http://127.0.0.1:8010` (or put it in `frontend-react/.env`, see
+`frontend-react/.env.example`). `.claude/launch.json` already uses 8010 for both.
+
+**Try the certified measurement:**
+
+```bash
+python scripts/make_demo_image.py --real --px-per-mm 12.5   # real krkCMd crack, downloads ~150 MB once
+python scripts/make_demo_image.py                           # or: synthetic line, no download
+```
+
+In the app open **Detection**, upload `outputs/demo/demo_crack_real.png`, choose **Reference Object**,
+set "Reference size in image (px)" = 12.5 and "Known physical size (mm)" = 1, and click **Calculate
+Crack Width from Image**. The "Certified measurement" panel should show w_c = 0.018 mm, the network at
+0.27 mm with a 90 % interval 0.16-0.35 mm (reference 0.29 mm), INCONCLUSIVE at the widest 5 % and
+DOES NOT CONFORM for the element maximum (limit 0.2 mm), and "re-shoot about 5.3x closer".
+
+What is **not** in git and when you need it: the krkCMd table and image bands (only for reproducing the
+research, see [Reproducing the research](#reproducing-the-research)), `outputs/` (regenerated; also holds
+gauge-anchoring records in `outputs/anchors.json`), `.env` (optional API key) and the datasets for
+re-training the vision models ([Datasets](#datasets)). Everything needed to run the app and the tests is
+in the repo.
 
 ### Prerequisites
 
@@ -224,7 +297,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in the project root (it is git-ignored; there is no template file in the repo):
+Create a `.env` file in the project root (it is git-ignored; copy `.env.example`):
 
 ```
 GEMINI_API_KEY=your_google_gemini_api_key_here

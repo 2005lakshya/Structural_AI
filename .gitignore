@@ -106,3 +106,6 @@ krk_bands/
 
 # confidential invention material: never commit before a patent filing
 invention_disclosure/
+
+# templates for the git-ignored .env files
+!.env.example

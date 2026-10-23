@@ -30,3 +30,5 @@ scikit-image
 remotezip
 tifffile
 pytest
+pydantic
+langchain-core
