@@ -87,7 +87,8 @@ def plan(estimate_mm, limit_mm, px_per_mm, method="photo", prob=0.8, focal_mm=No
     out = dict(estimate_mm=estimate_mm, limit_mm=limit_mm, current_px_per_mm=px_per_mm, target_probability=prob,
                p_conclusive_now=round(p_conclusive(table, method, limit_mm * 1000, px_per_mm, estimate_mm * 1000), 3))
     if need is None:
-        out.update(achievable=False, advice=("Too close to the limit to be decided by a photo even at 252 px/mm: "
+        out.update(achievable=False, advice=("No photo resolution up to 252 px/mm decides a crack of this width "
+                                             f"with {prob:.0%} probability (it is in the dead band around the limit): "
                                              "measure this crack with a gauge or microscope."))
         return out
     factor = need / px_per_mm
@@ -99,7 +100,7 @@ def plan(estimate_mm, limit_mm, px_per_mm, method="photo", prob=0.8, focal_mm=No
         if focal_mm and pixel_um:
             dist_mm = focal_mm / (need * pixel_um / 1000.0)
             out["max_camera_distance_cm"] = round(dist_mm / 10.0, 1)
-            out["advice"] += f" With a {focal_mm} mm lens and {pixel_um} um pixels: camera <= {dist_mm/10:.1f} cm."
+            out["advice"] += f" With a {focal_mm:g} mm lens and {pixel_um:g} um pixels: camera <= {dist_mm/10:.1f} cm."
     return out
 
 

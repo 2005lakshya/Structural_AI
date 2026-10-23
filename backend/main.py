@@ -835,6 +835,10 @@ async def measure_crack_width_image(
     cover_mm: float = 40.0,
     design_life_years: float = 50.0,
     lab_reading_mm: float = 0.0,
+    location_id: str = "",
+    anchor_gauge_mm: float = 0.0,
+    lens_focal_mm: float = 0.0,
+    pixel_size_um: float = 0.0,
 ):
     """
     Measure crack width directly from an image using U-Net segmentation
@@ -869,6 +873,11 @@ async def measure_crack_width_image(
         known_length_mm=known_length_mm,
         dpi=dpi,
         exposure=exposure,
+        location_id=location_id.strip(),
+        gauge_reading_mm=anchor_gauge_mm,
+        # camera optics for the re-shoot distance (both needed; otherwise only "x times closer")
+        lens_focal_mm=lens_focal_mm,
+        pixel_size_um=pixel_size_um,
     )
 
     # Compare against a lab/gauge reading of the same spot, if the user gave one.
@@ -943,6 +952,8 @@ async def measure_crack_width_image(
         "lab_comparison":          lab_comparison,
         # resolution-robust width, 90 % conformal interval, conforms / does_not_conform / inconclusive
         "photometric":             result.photometric,
+        # all five certified stages (scripts/certified_width.py)
+        "certified":               result.certified,
 
         # IS 456
         "exposure":              exposure,
@@ -977,6 +988,7 @@ async def measure_crack_width_ridge(
     known_length_mm: float = 0.0,
     gauge_reading_mm: float = 0.0,
     exposure: str = "moderate",
+    location_id: str = "",
 ):
     """
     Training-free crack width measurement (multi-scale ridge filter + sub-pixel
@@ -1005,7 +1017,9 @@ async def measure_crack_width_ridge(
     roi_box = _boxes(roi)
     mask = segment_cracks(img, roi=roi_box[0] if roi_box else None, exclude_boxes=_boxes(exclude))
     result = measure_crack_width(mask, img, known_length_px=known_length_px,
-                                 known_length_mm=known_length_mm, exposure=exposure)
+                                 known_length_mm=known_length_mm, exposure=exposure,
+                                 location_id=location_id.strip(),
+                                 gauge_reading_mm=gauge_reading_mm if location_id.strip() else 0.0)
     warnings = list(result.warnings)
     if not roi_box:
         warnings.append("No ROI given: background objects can be picked up as cracks. Pass roi='x,y,w,h'.")
@@ -1041,6 +1055,7 @@ async def measure_crack_width_ridge(
         "scale_reliable": result.scale_reliable,
         "min_resolvable_width_mm": result.min_resolvable_width_mm,
         "photometric": result.photometric,
+        "certified": result.certified,
         "gauge_comparison": comparison,
         "severity_level": result.severity.get("level", ""),
         "warnings": warnings,

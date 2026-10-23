@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { analyzeImage, measureCrackWidthFromImage } from '../services/api';
+import CertifiedAssessment from './CertifiedAssessment';
 
 // Severity colors for direct vision classification
 const SEVERITY_COLORS = {
@@ -62,6 +63,10 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
   const [refLenMm, setRefLenMm] = useState(25);
   const [dpiVal, setDpiVal] = useState(300);
   const [labReading, setLabReading] = useState('');
+  const [locationId, setLocationId] = useState('');
+  const [anchorGauge, setAnchorGauge] = useState('');
+  const [focalMm, setFocalMm] = useState('');
+  const [pixelUm, setPixelUm] = useState('');
   const [coverMm, setCoverMm] = useState(40);
   const [designLifeYears, setDesignLifeYears] = useState(50);
 
@@ -113,6 +118,9 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
     try {
       const params = {};
       if (+labReading > 0) params.lab_reading_mm = +labReading;
+      if (locationId.trim()) params.location_id = locationId.trim();
+      if (locationId.trim() && +anchorGauge > 0) params.anchor_gauge_mm = +anchorGauge;
+      if (+focalMm > 0 && +pixelUm > 0) { params.lens_focal_mm = +focalMm; params.pixel_size_um = +pixelUm; }
       if (scaleMode === 'camera')    params.camera_distance_cm = cameraDistance;
       if (scaleMode === 'reference') { params.known_length_px = refLenPx; params.known_length_mm = refLenMm; }
       if (scaleMode === 'dpi')       params.dpi = dpiVal;
@@ -348,6 +356,53 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
 
         <div style={{ maxWidth: 640, marginBottom: 20 }}>
           <div style={{ fontWeight: 600, marginBottom: 10, color: 'var(--text-2)' }}>
+            Gauge Anchoring (optional, for monitoring the same spot over time)
+          </div>
+          <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.03))', padding: '14px 18px', borderRadius: 10, border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Location name</label>
+              <input type="text" className="cw-number-input" value={locationId}
+                placeholder="e.g. Beam B2 left" onChange={e => setLocationId(e.target.value)}
+                style={{ marginTop: 4, width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Gauge reading now (mm, first visit only)</label>
+              <input type="number" className="cw-number-input" value={anchorGauge} step="0.01" min={0}
+                placeholder="leave empty on later visits" onChange={e => setAnchorGauge(e.target.value)}
+                style={{ marginTop: 4, width: '100%' }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>
+            First visit: enter the location and one gauge reading. Later visits: enter only the location;
+            the photo width is corrected with that reading.
+          </p>
+        </div>
+
+        <div style={{ maxWidth: 640, marginBottom: 20 }}>
+          <div style={{ fontWeight: 600, marginBottom: 10, color: 'var(--text-2)' }}>
+            Camera (optional, for the exact re-shoot distance)
+          </div>
+          <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.03))', padding: '14px 18px', borderRadius: 10, border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Lens focal length (mm)</label>
+              <input type="number" className="cw-number-input" value={focalMm} step="0.1" min={0}
+                placeholder="typical phone: 4.2" onChange={e => setFocalMm(e.target.value)}
+                style={{ marginTop: 4, width: '100%' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 13, color: 'var(--text-2)' }}>Sensor pixel size (µm)</label>
+              <input type="number" className="cw-number-input" value={pixelUm} step="0.01" min={0}
+                placeholder="e.g. 1.0 (phone spec sheet)" onChange={e => setPixelUm(e.target.value)}
+                style={{ marginTop: 4, width: '100%' }} />
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>
+            Only for photos used at the camera's full resolution (not cropped or resized).
+          </p>
+        </div>
+
+        <div style={{ maxWidth: 640, marginBottom: 20 }}>
+          <div style={{ fontWeight: 600, marginBottom: 10, color: 'var(--text-2)' }}>
             Durability Impact Inputs (chloride-ingress service-life model)
           </div>
           <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.03))', padding: '14px 18px', borderRadius: 10, border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -391,19 +446,7 @@ function CrackDetection({ onNavigate, onDetectionResult }) {
                 <strong>{widthResult.lab_comparison.abs_error_mm} mm ({widthResult.lab_comparison.rel_error_pct}%)</strong>
               </div>
             )}
-            {widthResult.photometric?.available && (
-              <div className={`banner ${widthResult.photometric.decision === 'inconclusive' ? 'error' : 'info'}`}
-                style={{ marginBottom: 16 }}>
-                <span>
-                  <strong>Resolution-robust check (photometric width):</strong>{' '}
-                  p95 width {widthResult.photometric.p95_mm} mm, 90% interval{' '}
-                  [{widthResult.photometric.interval90_mm[0]}, {widthResult.photometric.interval90_mm[1]}] mm vs limit{' '}
-                  {widthResult.photometric.limit_mm} mm →{' '}
-                  <strong>{{ conforms: 'CONFORMS', does_not_conform: 'DOES NOT CONFORM',
-                             inconclusive: 'INCONCLUSIVE (re-shoot closer or use a gauge)' }[widthResult.photometric.decision]}</strong>
-                </span>
-              </div>
-            )}
+            <CertifiedAssessment c={widthResult.certified} />
 
             {/* Severity Verdict Banner */}
             <div style={{

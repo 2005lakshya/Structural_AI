@@ -103,3 +103,6 @@ config_local.py
 data/krkCMd_raw/
 # krkCMd image bands fetched by scripts/fetch_krkCMd_band.py
 krk_bands/
+
+# confidential invention material: never commit before a patent filing
+invention_disclosure/

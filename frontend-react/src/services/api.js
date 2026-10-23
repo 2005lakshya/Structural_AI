@@ -135,6 +135,10 @@ export const measureCrackWidthFromImage = async (file, params = {}) => {
       cover_mm: params.cover_mm ?? 40,
       design_life_years: params.design_life_years ?? 50,
       lab_reading_mm: params.lab_reading_mm ?? 0,
+      location_id: params.location_id ?? '',
+      anchor_gauge_mm: params.anchor_gauge_mm ?? 0,
+      lens_focal_mm: params.lens_focal_mm ?? 0,
+      pixel_size_um: params.pixel_size_um ?? 0,
     }).toString();
     const response = await axios.post(
       `${API_BASE_URL}/measure_crack_width_image?${query}`,

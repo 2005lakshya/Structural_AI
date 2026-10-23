@@ -153,3 +153,61 @@ def test_element_table_takes_max_over_locations():
     e = element_table(d, "est")
     assert e.loc[("s", 1, 1)].ref_max == 300 and e.loc[("s", 1, 1)].est_max == 400
     assert e.loc[("s", 1, 2)].n == 1
+
+
+def test_measurability_limit_scales_with_pitch_and_falls_with_snr():
+    from scripts.certified_width import measurability_limit_um
+    w1, w2 = measurability_limit_um(100.0, 20.0), measurability_limit_um(200.0, 20.0)
+    assert 1.8 < w2 / w1 < 2.2                       # blur is 0.7 px, so w_c is proportional to pitch
+    assert measurability_limit_um(100.0, 60.0) < w1 < measurability_limit_um(100.0, 5.0)
+
+
+def test_certified_assessment_runs_all_stages_and_anchors(tmp_path, monkeypatch):
+    import cv2
+    import scripts.certified_width as cw
+    from scripts.crack_width_measure import measure_crack_width
+    from scripts.ridge_crack_segmentation import segment_cracks
+
+    monkeypatch.setattr(cw, "ANCHOR_FILE", str(tmp_path / "anchors.json"))
+    rng = np.random.default_rng(1)
+    ppm = 8.0
+    n = int(40 * ppm)
+    x = (np.arange(n) - n / 2) / ppm * 1000
+    Q, _, _ = slot_template(250.0, 0.0, x - 500 / ppm, x + 500 / ppm, 700 / ppm)
+    img = np.clip(np.tile(170 - 160 * Q, (n, 1)) + rng.normal(0, 4, (n, n)), 0, 255).astype(np.uint8)
+    bgr = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    r = measure_crack_width(segment_cracks(bgr), bgr, known_length_px=ppm, known_length_mm=1.0,
+                            exposure="mild", location_id="L1", gauge_reading_mm=0.25)
+    c = r.certified
+    assert c["available"] and c["measurability"]["measurable"]
+    assert set(c["estimators"]) >= {"photo", "fusion"}
+    for e in c["estimators"].values():
+        assert e["interval90_mm"][0] <= e["p95_mm"] <= e["interval90_mm"][1]
+        assert e["decision"] in ("conforms", "does_not_conform", "inconclusive")
+    assert c["anchoring"]["status"] == "installed"
+    r2 = measure_crack_width(segment_cracks(bgr), bgr, known_length_px=ppm, known_length_mm=1.0,
+                             exposure="mild", location_id="L1")
+    a = r2.certified["anchoring"]
+    assert a["status"] == "anchored"
+    # the same photo again: the anchored width moves towards the gauge reading
+    for k, e in a["estimators"].items():
+        assert abs(e["width_mm"] - 0.25) <= abs(c["estimators"][k]["p95_mm"] - 0.25) + 1e-6
+
+
+def test_capture_advice_gives_camera_distance_and_anchoring_gives_healing_ratio(tmp_path, monkeypatch):
+    import scripts.certified_width as cw
+    monkeypatch.setattr(cw, "ANCHOR_FILE", str(tmp_path / "anchors.json"))
+    rng = np.random.default_rng(2)
+    ppm, pitch = 5.0, 200.0
+    k = np.arange(-6, 7, dtype=np.float32)
+    x = k * pitch
+    Q, _, _ = slot_template(260.0, 0.0, x - pitch / 2, x + pitch / 2, 0.7 * pitch)
+    rows = np.clip(170 - 160 * Q[None, :] + rng.normal(0, 4, (200, len(k))), 0, 255)
+    c = cw.assess(rows, k, ppm, 0.3, location_id="L2", gauge_mm=0.26, focal_mm=4.2, pixel_um=1.4)
+    if c["decision"] == "inconclusive" and c["capture_advice"].get("achievable"):
+        d = c["capture_advice"]["max_camera_distance_cm"]
+        need = c["capture_advice"]["required_px_per_mm"]
+        assert abs(d - 4.2 / (need * 1.4 / 1000.0) / 10.0) < 0.1       # d <= f / (r* s)
+    a = cw.assess(rows * 0 + rows, k, ppm, 0.3, location_id="L2")["anchoring"]
+    assert a["status"] == "anchored" and a["visits"] == 2
+    assert all(abs(e["healing_ratio"]) < 1e-6 for e in a["estimators"].values())   # same photo: no change

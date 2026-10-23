@@ -5,12 +5,15 @@
       "name": "backend",
       "runtimeExecutable": "python",
       "runtimeArgs": ["main.py"],
-      "port": 8000
+      "env": { "STRUCTURALAI_PORT": "8010" },
+      "port": 8010,
+      "autoPort": false
     },
     {
       "name": "frontend",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "frontend-react", "start"],
+      "env": { "REACT_APP_API_URL": "http://127.0.0.1:8010", "BROWSER": "none" },
       "port": 3000
     }
   ]

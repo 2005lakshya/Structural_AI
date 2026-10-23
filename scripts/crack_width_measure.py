@@ -146,6 +146,10 @@ class CrackWidthResult:
     # Resolution-robust photometric width, 90 % interval and certified decision
     # (photometric_assessment; empty dict when not available)
     photometric:         dict  = field(default_factory=dict)
+    # All five certified stages: measurability limit, photo / fusion / network estimators,
+    # intervals, decisions (location and element maximum), capture advice, gauge anchoring
+    # (scripts/certified_width.py)
+    certified:           dict  = field(default_factory=dict)
 
 
 # Below this many pixels the crack edge blur dominates and the width is only an
@@ -270,6 +274,32 @@ def fwhm_from_profile(row: np.ndarray, t: np.ndarray, min_depth: float = 10.0):
 #  Photometric width + conformal interval + three-way compliance decision
 # ─────────────────────────────────────────────────────────────────────────────
 
+def crack_profiles(gray_raw: np.ndarray, skeleton: np.ndarray, pixels_per_mm: float, max_points: int = 300):
+    """Profiles across the crack in the unsmoothed grey image at 1-pixel steps over +-0.8 mm
+    (at least 6 px), as in the krkCMd calibration. Returns (rows, k) or None."""
+    from scipy.ndimage import map_coordinates
+
+    centres, normals = _centres_and_normals(skeleton, max_points)
+    if len(centres) < 5 or pixels_per_mm <= 0:
+        return None
+    R = int(np.ceil(max(800.0 * pixels_per_mm / 1000.0, 6.0)))
+    k = np.arange(-R, R + 1, dtype=np.float32)
+    py = centres[:, 0:1] + normals[:, 0:1] * k[None, :]
+    px = centres[:, 1:2] + normals[:, 1:2] * k[None, :]
+    return map_coordinates(gray_raw, [py, px], order=1, mode="nearest"), k
+
+
+def certified_assessment(gray_raw: np.ndarray, skeleton: np.ndarray, pixels_per_mm: float, limit_mm: float,
+                         location_id: str = "", gauge_mm: float = 0.0, max_points: int = 300, **camera) -> dict:
+    """All five stages (scripts/certified_width.py) on the profiles of this crack."""
+    from scripts.certified_width import assess
+
+    p = crack_profiles(gray_raw, skeleton, pixels_per_mm, max_points)
+    if p is None:
+        return dict(available=False, reason="too few centre-line points")
+    return assess(p[0], p[1], pixels_per_mm, limit_mm, location_id=location_id, gauge_mm=gauge_mm, **camera)
+
+
 def photometric_assessment(gray_raw: np.ndarray, skeleton: np.ndarray, pixels_per_mm: float,
                            limit_mm: float, max_points: int = 300) -> dict:
     """Resolution-robust width with a 90 % distribution-free interval, from the deficit area of
@@ -365,6 +395,10 @@ def measure_crack_width(
     known_length_mm:    float = 0.0,   # option B
     dpi:                float = 0.0,   # option C
     exposure:           str   = "moderate",
+    location_id:        str   = "",    # gauge anchoring: name of the monitored location
+    gauge_reading_mm:   float = 0.0,   # gauge anchoring: reading taken at installation
+    lens_focal_mm:      float = 0.0,   # re-shoot distance: lens focal length of the camera used
+    pixel_size_um:      float = 0.0,   # re-shoot distance: sensor pixel size (uncropped, full resolution)
 ) -> CrackWidthResult:
     """
     Measure crack widths from a binary segmentation mask.
@@ -490,6 +524,19 @@ def measure_crack_width(
     # (docs/RESULTS_limits.md). Uses the unsmoothed grey image.
     gray_raw = cv2.cvtColor(original_bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
     result.photometric = photometric_assessment(gray_raw, skeleton, ppm, result.exposure_limit_mm)
+    result.certified = certified_assessment(gray_raw, skeleton, ppm, result.exposure_limit_mm,
+                                            location_id=location_id, gauge_mm=gauge_reading_mm,
+                                            focal_mm=lens_focal_mm, pixel_um=pixel_size_um)
+    if result.certified.get("available"):
+        # the physical limit of this photo replaces the fixed 2-pixel rule of thumb
+        m = result.certified["measurability"]
+        result.min_resolvable_width_mm = m["wc_mm"]
+        result.warnings = [w for w in result.warnings if not w.startswith("Crack is only")]
+        if not m["measurable"]:
+            result.warnings.append(
+                f"Crack is below the measurability limit of this photo (w_c = {m['wc_mm']} mm from its "
+                f"resolution, blur and background noise {m['noise_grey']} grey levels): the width cannot be "
+                f"determined, only bounded.")
     if result.photometric.get("available") and result.photometric["decision"] == "inconclusive":
         advice = "Re-shoot closer or use a crack gauge."
         try:
@@ -621,6 +668,8 @@ def measure_from_image(
     known_length_mm: float = 0.0,
     dpi: float = 0.0,
     exposure: str = "moderate",
+    location_id: str = "",
+    gauge_reading_mm: float = 0.0,
 ) -> CrackWidthResult:
     """
     End-to-end: RGB image → CrackWidthResult.
@@ -635,4 +684,6 @@ def measure_from_image(
         known_length_mm=known_length_mm,
         dpi=dpi,
         exposure=exposure,
+        location_id=location_id,
+        gauge_reading_mm=gauge_reading_mm,
     )
