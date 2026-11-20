@@ -19,6 +19,8 @@ try {
 
     git init --quiet -b main
     git lfs install --local
+    # Hugging Face rejects binary files that are not stored in LFS.
+    git lfs track "*.png" "*.jpg" "*.jpeg" "*.gif" "*.pdf" "*.pt" "*.pth" "*.pkl" "*.npy" "*.zip" | Out-Null
     git add -A
     git commit --quiet -m "Deploy StructuralAI backend"
     git push --force "https://huggingface.co/spaces/$Space" main
