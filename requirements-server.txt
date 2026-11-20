@@ -1,0 +1,22 @@
+# Runtime-only dependencies for hosting the FastAPI backend (see Dockerfile).
+# torch/torchvision are installed separately from the CPU wheel index.
+# scikit-learn and xgboost are pinned to the versions the models/ml/*.pkl files were saved with.
+fastapi==0.140.0
+uvicorn==0.51.0
+python-multipart==0.0.32
+pydantic==2.13.4
+numpy==2.4.6
+pandas==3.0.5
+scipy==1.18.0
+scikit-image
+scikit-learn==1.9.0
+xgboost==3.3.0
+shap==0.52.0
+joblib==1.5.3
+matplotlib==3.11.1
+opencv-python-headless==5.0.0.93
+pillow==12.3.0
+reportlab==5.0.0
+python-dotenv==1.2.2
+langchain-core==1.5.1
+langchain-google-genai==4.3.1
